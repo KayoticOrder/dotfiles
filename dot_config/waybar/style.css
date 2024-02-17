@@ -1,0 +1,92 @@
+* {
+  border: none;
+  border-radius: 0px;
+  font-family: "Iosevka", "FontAwesome";
+  font-size: 20px;
+  font-style: normal;
+  min-height: 0px;
+}
+
+window#waybar {
+  background: #1e1f29;
+  border: 2px solid #353546;
+  border-radius: 10px;
+  color: #52526c;
+}
+
+#workspaces {
+  border: solid 0px red;
+}
+
+#workspaces button {
+  border-radius: 0px;
+  color: #706f68;
+  transition: all 0.1s ease-in-out;
+}
+
+#workspaces button.empty {
+  color: #353546;
+}
+
+#workspaces button.active {
+  color: #d6d2b6;
+  border-bottom: solid 3px #f85b61;
+}
+
+#workspaces button:hover {
+  background: #d6d2b6;
+  color: #16161e;
+  /* border-top: 2px solid #353546; */
+  /* border-bottom: 2px solid #353546; */
+}
+
+#pulseaudio {
+  margin-top: 0px;
+  margin-left: 0px;
+  padding-left: 7px;
+  padding-right: 0px;
+  margin-bottom: 0px;
+  border-radius: 5px;
+  transition: none;
+  color: #9087A6;
+}
+
+#tray {
+	padding-right: 10px;
+	margin-right: 5px;
+	border-right: solid 2px #353546;
+}
+
+#custom-colorpicker {
+  color: #F89C65;
+  padding-left: 10px;
+  padding-right: 0px;
+  font-size: 18px;
+}
+
+#clock {
+  margin-top: 0px;
+  margin-left: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 0px;
+  border-radius: 10px;
+  transition: none;
+  color: #95b66b;
+}
+
+#custom-launcher {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 10px 0px 10px;
+  color: #7cb0c5;
+  border-radius: 0px;
+  font-family: "kanagawa";
+  font-size: 30px;
+  border-right: solid 2px #353546;
+}
+
+#custom-media {
+    color: #77A49B;
+    min-width: 100px;
+}
+

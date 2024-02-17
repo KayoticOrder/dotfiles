@@ -1,0 +1,11 @@
+include theme.conf
+
+font_family	Iosevka Nerd Font
+font_size	14
+
+enable_audio_bell no
+
+
+# BEGIN_KITTY_THEME
+include kanagawa.conf
+# END_KITTY_THEME
