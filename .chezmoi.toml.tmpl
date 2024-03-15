@@ -1,0 +1,30 @@
+{{- $osID := .chezmoi.os -}}
+{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
+  {{- $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- if $osID = "linux-arch" -}}
+{{- writeToStdout "Detected OS: Arch Linux\n" -}}
+{{- else if $osID = "linux-ubuntu" -}}
+{{- writeToStdout "Detected OS: Ubuntu Linux\n" -}}
+{{- else if $osID = "windows" -}}
+{{- writeToStdout "Detected OS: Windows\n" -}}
+{{- else -}}
+{{- writeToStdout "Unsupported OS detected! Aborting setup.\n" -}}
+{{- exit -}}
+{{- end -}}
+
+{{- $hyprlandwm := false -}}
+{{- $bspwm := false -}}
+{{- if eq $osID "linux-arch" -}}
+  {{ $hyprlandwm = promptBool "Do you want to install Hyprland? (y/n) " }}
+  {{- if not $hyprlandwm -}}
+    {{ $bspwm = promptBool "Do you want to install bspwm? (y/n) " }}
+  {{- end -}}
+{{- end -}}
+
+[data]
+  osid = {{ $osID | quote }}
+  hyprlandwm = {{ $hyprlandwm }}
+  bspwm = {{ $bspwm }}
+

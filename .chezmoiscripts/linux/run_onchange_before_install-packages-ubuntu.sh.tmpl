@@ -1,0 +1,29 @@
+{{ if eq .osid "linux-ubuntu" -}}
+#!/bin/bash
+
+packages=(
+  git
+  fzf
+  python
+  ripgrep
+  ranger
+  zsh
+)
+
+{{ $sudo := "sudo " -}}
+{{ if eq .chezmoi.username "root" -}}
+  {{ $sudo = "" -}}
+{{ end -}}
+
+echo "Updating packages..."
+{{ $sudo }}apt update --noconfirm
+{{ $sudo }}apt upgrade --noconfirm
+
+for package in ${packages[@]}; do
+  echo "Installing $package"
+  {{ $sudo }}pacman -S --noconfirm $package
+done
+
+echo -e "\033[0;32m>>>>> Finish Setting Up Ubuntu Linux Packages <<<<<\033[0m"
+
+{{ end -}}

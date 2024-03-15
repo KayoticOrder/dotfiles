@@ -5,8 +5,13 @@
   "margin-bottom": 0,
   "margin-left": 10,
   "margin-right": 10,
-  "modules-left": ["custom/launcher", "hyprland/workspaces"],
-  "modules-center": ["custom/media"],
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces"
+  ],
+  "modules-center": [
+    "custom/media"
+  ],
   "modules-right": [
     "tray",
     "pulseaudio",
@@ -14,12 +19,10 @@
     "clock",
     "custom/power"
   ],
-
   "custom/launcher": {
     "format": "\u0042",
     "on-click": "bash $HOME/.config/rofi/launchers/type-1/launcher.sh"
   },
-
   "hyprland/workspaces": {
     "all-outputs": true,
     "disable-scroll": true,
@@ -38,7 +41,6 @@
       // "active": "",
       // "default": "〇"
     },
-
     "persistent-workspaces": {
       "1": [],
       "2": [],
@@ -52,7 +54,6 @@
       "10": []
     }
   },
-
   "pulseaudio": {
     "tooltip": false,
     "scroll-step": 5,
@@ -60,30 +61,25 @@
     "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "format-muted": "",
     "format-icons": {
-      "default": ["", "", ""]
+      "default": [
+        "",
+        "",
+        ""
+      ]
     }
   },
-
-  "tray": {
-    "icon-size": 21,
-    "spacing": 10
-  },
-
   "custom/colorpicker": {
     "format": "",
     "on-click": "hyprpicker -a"
   },
-
   "clock": {
     "format": "{:%H:%M}",
     "format-alt": "{:%I:%M %p %d/%m/%Y}"
   },
-
   "tray": {
     "icon-size": 21,
     "spacing": 10
   },
-
   "custom/media": {
     "format": "{icon}  :: <span>{}</span>",
     "return-type": "json",

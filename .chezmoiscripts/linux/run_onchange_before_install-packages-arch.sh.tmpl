@@ -1,0 +1,63 @@
+{{ if eq .osid "linux-arch" -}}
+#!/bin/bash
+
+packages=(
+  git
+  fzf
+  neovim
+  python
+  ripgrep
+  ranger
+  zsh
+)
+
+{{ if .hyprlandwm -}}
+  packages+=(
+    hyprland
+    waybar
+    wofi
+  )
+{{ end -}}
+
+echo "Updating packages..."
+{{ if ne .chezmoi.username "root" -}}
+sudo pacman -Syu --noconfirm
+{{ else -}}
+pacman -Syu --noconfirm
+{{ end -}}
+
+for package in ${packages[@]}; do
+  if [ "$(pacman -Qq $package 2> /dev/null)" != $package ]; then
+    echo "Installing $package"
+    {{ if ne .chezmoi.username "root" -}}
+    sudo pacman -S --noconfirm $package
+    {{ else -}}
+    pacman -S --noconfirm $package
+    {{ end -}}
+  fi
+done
+
+# Install yay
+if [ ! $(command -v yay) ]; then
+  echo "Installing yay"
+  {{ if ne .chezmoi.username "root" -}}
+  sudo pacman -S --needed --noconfirm git base-devel
+  {{ else -}}
+  pacman -S --needed --noconfirm git base-devel
+  {{ end -}}
+  git clone https://aur.archlinux.org/yay.git /tmp/yay
+  cd /tmp/yay
+  makepkg -si --noconfirm
+  rm -rf /tmp/yay
+fi
+
+for aur_package in ${aur_packages[@]}; do
+  if [ $(pacman -Qq $aur_package 2> /dev/null) != $aur_package ]; then
+    echo "Installing $aur_package from AUR"
+    yay -S --noconfirm $aur_package
+  fi
+done
+
+echo -e "\033[0;32m>>>>> Finished Setting Up Arch Linux Packages <<<<<\033[0m"
+
+{{ end -}}
