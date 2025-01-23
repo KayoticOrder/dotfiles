@@ -1,0 +1,7 @@
+- omnipkg:
+  - install: [ hyprland, hyprpaper, rofi, waybar ]
+
+- link:
+    ~/.config/hypr: dots/hypr/.config/hypr
+    ~/.config/rofi: dots/hypr/.config/rofi
+    ~/.config/waybar: dots/hypr/.config/waybar

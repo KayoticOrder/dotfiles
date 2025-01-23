@@ -1,0 +1,5 @@
+- omnipkg:
+  - install: [ tmux ]
+
+- link:
+    ~/.config/tmux: dots/tmux/.config/tmux

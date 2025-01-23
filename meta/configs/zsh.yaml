@@ -1,0 +1,10 @@
+- omnipkg:
+  - install: [ zsh, fzf, zoxide ]
+
+- shell:
+  - [ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended ]
+
+- link:
+    ~/.zshrc: dots/zsh/.zshrc
+    ~/.p10k.zsh: dots/zsh/.p10k.zsh
+    ~/.oh-my-zsh/custom: dots/zsh/.oh-my-zsh/custom

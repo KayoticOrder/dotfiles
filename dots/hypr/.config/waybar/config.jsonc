@@ -1,0 +1,98 @@
+{
+  "layer": "top",
+  "height": 43,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "margin-left": 10,
+  "margin-right": 10,
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces"
+  ],
+  "modules-center": [
+    "custom/media"
+  ],
+  "modules-right": [
+    "tray",
+    "pulseaudio",
+    "custom/colorpicker",
+    "clock",
+    "custom/power"
+  ],
+  "custom/launcher": {
+    "format": "\u0042",
+    "on-click": "bash $HOME/.config/rofi/launchers/type-1/launcher.sh"
+  },
+  "hyprland/workspaces": {
+    "all-outputs": true,
+    "disable-scroll": true,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "七",
+      "8": "八",
+      "9": "九",
+      "10": "〇"
+      // "active": "",
+      // "default": "〇"
+    },
+    "persistent-workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": []
+    }
+  },
+  "pulseaudio": {
+    "tooltip": false,
+    "scroll-step": 5,
+    "format": "{icon}",
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "format-muted": "",
+    "format-icons": {
+      "default": [
+        "",
+        "",
+        ""
+      ]
+    }
+  },
+  "custom/colorpicker": {
+    "format": "",
+    "on-click": "hyprpicker -a"
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%I:%M %p %d/%m/%Y}"
+  },
+  "tray": {
+    "icon-size": 21,
+    "spacing": 10
+  },
+  "custom/media": {
+    "format": "{icon}  :: <span>{}</span>",
+    "return-type": "json",
+    "max-length": 64,
+    "exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"{{playerName}} : {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F -p 'spotify, *'",
+    "on-click-middle": "playerctl play-pause -p 'spotify, *'",
+    "on-click": "playerctl previous -p 'spotify, *'",
+    "on-click-right": "playerctl next -p 'spotify, *'",
+    "on-scroll-up": "playerctl -p spotify volume 0.05+",
+    "on-scroll-down": "playerctl -p spotify volume 0.05-",
+    "format-icons": {
+      "Playing": "<span foreground='#95B66B'>󰝚</span>",
+      "Paused": "<span foreground='#353546'>󰝛</span>"
+    }
+  }
+}

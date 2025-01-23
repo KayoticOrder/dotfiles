@@ -1,3 +1,15 @@
 [submodule "meta/dotbot"]
 	path = meta/dotbot
 	url = https://github.com/anishathalye/dotbot.git
+[submodule "dots/zsh/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"]
+	path = dots/zsh/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting
+[submodule "dots/zsh/.oh-my-zsh/custom/plugins/zsh-completions"]
+	path = dots/zsh/.oh-my-zsh/custom/plugins/zsh-completions
+	url = https://github.com/zsh-users/zsh-completions
+[submodule "dots/zsh/.oh-my-zsh/custom/plugins/zsh-autosuggestions"]
+	path = dots/zsh/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions
+[submodule "dots/zsh/.oh-my-zsh/custom/themes/powerlevel10k"]
+	path = dots/zsh/.oh-my-zsh/custom/themes/powerlevel10k
+	url = https://github.com/romkatv/powerlevel10k.git
