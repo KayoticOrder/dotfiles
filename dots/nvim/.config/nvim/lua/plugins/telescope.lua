@@ -19,22 +19,32 @@ return {
 		local telescope = require("telescope")
 		local actions = require("telescope.actions")
 		telescope.setup({
-			defaults = {
+			defaults = require("telescope.themes").get_dropdown({
 				mappings = {
 					i = {
 						["<C-j>"] = actions.move_selection_next,
 						["<C-k>"] = actions.move_selection_previous,
-						["<C-c>"] = actions.close,
+						["<C-l>"] = actions.select_default,
+						["<C-w>"] = actions.close,
 					},
 				},
-			},
+				pickers = {
+					theme = "dropdown",
+				},
+			}),
 			pickers = {
 				buffers = {
 					mappings = {
+						i = {
+							["<C-d>"] = actions.delete_buffer,
+						},
 						n = {
 							["dd"] = actions.delete_buffer,
 						},
 					},
+				},
+				find_files = {
+					theme = "dropdown",
 				},
 			},
 		})
