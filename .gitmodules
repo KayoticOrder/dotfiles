@@ -13,3 +13,12 @@
 [submodule "dots/zsh/.oh-my-zsh/custom/themes/powerlevel10k"]
 	path = dots/zsh/.oh-my-zsh/custom/themes/powerlevel10k
 	url = https://github.com/romkatv/powerlevel10k.git
+[submodule "dots/tmux/.config/tmux/plugins/tpm"]
+	path = dots/tmux/.config/tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm
+[submodule "dots/tmux/.config/tmux/plugins/tpm"]
+	path = dots/tmux/.config/tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm
+[submodule "dots/tmux/.config/tmux/plugins/vim-tmux-navigator"]
+	path = dots/tmux/.config/tmux/plugins/vim-tmux-navigator
+	url = https://github.com/christoomey/vim-tmux-navigator
