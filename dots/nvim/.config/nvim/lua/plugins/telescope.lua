@@ -10,6 +10,7 @@ return {
 			{ "<leader>fb", tb.buffers, desc = "Buffers" },
 			{ "<leader>fh", tb.help_tags, desc = "Help Tags" },
 			{ "<leader>fm", tb.keymaps, desc = "Keymaps" },
+			{ "<leader>fs", tb.lsp_document_symbols, desc = "Symbols" },
 			{ "gd", tb.lsp_definitions, desc = "Definition" },
 			{ "gD", tb.lsp_implementations, desc = "Implementation" },
 			{ "gr", tb.lsp_references, desc = "References" },
