@@ -21,6 +21,9 @@ opt.cursorline = true
 opt.undofile = true
 opt.undodir = vim.fn.expand("~/.vim/undo")
 
+opt.exrc = true -- Allow project-specific .nvimrc files
+opt.secure = true -- Disable potentially unsafe commands in local .nvimrc files
+
 vim.o.signcolumn = "yes"
 vim.diagnostic.config({
 	signs = true,

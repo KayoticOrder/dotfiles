@@ -37,6 +37,9 @@ return {
 
 			cmp.setup({
 				auto_brackets = {},
+				performance = {
+					max_view_entries = 10,
+				},
 				completion = {
 					completeopt = "menu,menuone,noinsert" .. (auto_select and "" or ",noselect"),
 				},
@@ -45,16 +48,12 @@ return {
 				},
 				preselect = auto_select and cmp.PreselectMode.Item or cmp.PreselectMode.None,
 				mapping = cmp.mapping.preset.insert({
-					["<C-d>"] = cmp.mapping.scroll_docs(-4),
-					["<C-f>"] = cmp.mapping.scroll_docs(4),
+					["<C-f>"] = cmp.mapping.confirm(),
 					["<C-Space>"] = cmp.mapping.complete(),
 					["<C-e>"] = cmp.mapping.close(),
 					["<C-j>"] = cmp.mapping.select_next_item(),
 					["<C-k>"] = cmp.mapping.select_prev_item(),
 					["<CR>"] = cmp.mapping.disable,
-					["<Tab>"] = cmp.mapping.confirm({
-						select = true,
-					}),
 				}),
 				sources = {
 					{ name = "copilot", group_index = 2 },
