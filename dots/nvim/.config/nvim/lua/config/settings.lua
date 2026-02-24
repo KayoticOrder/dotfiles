@@ -32,3 +32,10 @@ vim.diagnostic.config({
 	virtual_text = false,
 	underline = true,
 })
+
+-- Disable automatic comment continuation on new lines with 'o'
+vim.api.nvim_create_autocmd("BufEnter", {
+	callback = function()
+		vim.opt.formatoptions:remove({ "o" })
+	end,
+})
