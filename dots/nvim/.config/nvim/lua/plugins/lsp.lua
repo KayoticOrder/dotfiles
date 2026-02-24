@@ -96,7 +96,7 @@ return {
 		keys = {
 			{
 				"<M-o>",
-				"<cmd>ClangdSwitchSourceHeader<cr>",
+				"<cmd>LspClangdSwitchSourceHeader<cr>",
 				desc = "Clangd Switch Source Header",
 				ft = { "h", "hpp", "c", "cpp" },
 			},
