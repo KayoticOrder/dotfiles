@@ -1,7 +1,6 @@
 return {
 	"folke/which-key.nvim",
 	"nvim-tree/nvim-web-devicons",
-	"jiangmiao/auto-pairs",
 	{
 		"numToStr/Comment.nvim",
 		opts = {},
