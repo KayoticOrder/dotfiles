@@ -127,3 +127,6 @@ set -o ignoreeof
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 eval "$(zoxide init zsh --cmd cd)"
+
+# Created by `pipx` on 2025-06-07 17:10:27
+export PATH="$PATH:/home/kayotic/.local/bin"

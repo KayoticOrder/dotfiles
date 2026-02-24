@@ -52,9 +52,9 @@ window#waybar {
 }
 
 #tray {
-	padding-right: 10px;
-	margin-right: 5px;
-	border-right: solid 2px #353546;
+  padding-right: 10px;
+  margin-right: 5px;
+  border-right: solid 2px #353546;
 }
 
 #custom-colorpicker {
@@ -86,7 +86,6 @@ window#waybar {
 }
 
 #custom-media {
-    color: #77A49B;
-    min-width: 100px;
+  color: #77A49B;
+  min-width: 100px;
 }
-

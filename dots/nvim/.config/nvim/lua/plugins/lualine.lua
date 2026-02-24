@@ -1,7 +1,7 @@
 return {
 	{
 		"nvim-lualine/lualine.nvim",
-		dependencies = { "nvim-tree/nvim-web-devicons", "AndreM222/copilot-lualine" },
+		dependencies = { "nvim-tree/nvim-web-devicons" },
 		opts = {
 			options = {
 				icons_enabled = true,
@@ -26,7 +26,34 @@ return {
 				lualine_a = { "mode" },
 				lualine_b = { "branch", "diff", "diagnostics" },
 				lualine_c = { "filename" },
-				lualine_x = { "copilot", "encoding", "fileformat", "filetype" },
+				lualine_x = {
+					{
+						function()
+							local icons = {
+								[""] = " ",
+								["Normal"] = " ",
+								["InProgress"] = " ",
+								["Warning"] = " ",
+							}
+							local ok, api = pcall(require, "copilot.api")
+							if not ok then return "" end
+							local status = api.status.data.status or ""
+							return icons[status] or " "
+						end,
+						color = function()
+							local ok, api = pcall(require, "copilot.api")
+							if not ok then return {} end
+							local status = api.status.data.status or ""
+							return status == "Warning" and { fg = "#e5c07b" }
+								or status == "InProgress" and { fg = "#61afef" }
+								or status == "Normal" and { fg = "#98c379" }
+								or { fg = "#636363" }
+						end,
+					},
+					"encoding",
+					"fileformat",
+					"filetype",
+				},
 				lualine_y = { "progress" },
 				lualine_z = { "location" },
 			},
