@@ -50,48 +50,43 @@ return {
 
 	{
 		"williamboman/mason-lspconfig.nvim",
+		dependencies = {
+			"neovim/nvim-lspconfig",
+		},
 		config = function()
-			require("mason-lspconfig").setup({
-				handlers = {
-					-- The first entry (without a key) will be the default handler
-					function(server_name)
-						require("lspconfig")[server_name].setup({})
-					end,
-					["lua_ls"] = function()
-						require("lspconfig").lua_ls.setup({
-							on_init = function(client)
-								if client.workspace_folders then
-									local path = client.workspace_folders[1].name
-									if
-										vim.uv.fs_stat(path .. "/.uarc.json")
-										or vim.uv.fs_stat(path .. "/.luarc.jsonc")
-									then
-										return
-									end
-								end
+			require("mason-lspconfig").setup()
 
-								client.config.settings.Lua =
-									vim.tbl_deep_extend("force", client.config.settings.Lua, {
-										runtime = {
-											version = "LuaJIT",
-										},
-										workspace = {
-											checkThirdParty = false,
-											library = {
-												vim.env.VIMRUNTIME,
-											},
-										},
-									})
-							end,
-							settings = {
-								Lua = {
-									diagnostics = {
-										globals = { "vim" },
-									},
+			vim.lsp.config("lua_ls", {
+				on_init = function(client)
+					if client.workspace_folders then
+						local path = client.workspace_folders[1].name
+						if
+							vim.uv.fs_stat(path .. "/.uarc.json")
+							or vim.uv.fs_stat(path .. "/.luarc.jsonc")
+						then
+							return
+						end
+					end
+
+					client.config.settings.Lua =
+						vim.tbl_deep_extend("force", client.config.settings.Lua, {
+							runtime = {
+								version = "LuaJIT",
+							},
+							workspace = {
+								checkThirdParty = false,
+								library = {
+									vim.env.VIMRUNTIME,
 								},
 							},
 						})
-					end,
+				end,
+				settings = {
+					Lua = {
+						diagnostics = {
+							globals = { "vim" },
+						},
+					},
 				},
 			})
 		end,
