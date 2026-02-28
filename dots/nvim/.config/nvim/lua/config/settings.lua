@@ -25,6 +25,12 @@ opt.undodir = vim.fn.expand("~/.vim/undo")
 opt.exrc = true -- Allow project-specific .nvimrc files
 opt.secure = true -- Disable potentially unsafe commands in local .nvimrc files
 
+opt.autoread = true
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+  command = "if mode() != 'c' | checktime | endif",
+  pattern = { "*" },
+})
+
 vim.o.termguicolors = true
 vim.o.signcolumn = "yes"
 vim.diagnostic.config({
@@ -39,3 +45,4 @@ vim.api.nvim_create_autocmd("BufEnter", {
 		vim.opt.formatoptions:remove({ "o" })
 	end,
 })
+
