@@ -26,7 +26,7 @@ return {
 				-- Notes
 				map("<leader>on", "<cmd>Obsidian new<cr>", "Obsidian: New note")
 				map("<leader>oo", "<cmd>Obsidian quick_switch<cr>", "Obsidian: Quick switch")
-				map("<leader>os", "<cmd>Obsidian search<cr>", "Obsidian: Search notes")
+				map("<leader>og", "<cmd>Obsidian search<cr>", "Obsidian: Grep notes")
 				map("<leader>ot", "<cmd>Obsidian tags<cr>", "Obsidian: Browse tags")
 				map("<leader>or", "<cmd>Obsidian rename<cr>", "Obsidian: Rename note")
 
