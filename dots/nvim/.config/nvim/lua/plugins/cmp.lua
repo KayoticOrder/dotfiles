@@ -23,6 +23,7 @@ return {
 			require("copilot_cmp").setup()
 
 			cmp.setup.cmdline(":", {
+				mapping = cmp.mapping.preset.cmdline(),
 				sources = cmp.config.sources({
 					{ name = "path" },
 				}, {
@@ -31,6 +32,7 @@ return {
 						option = {
 							ignore_cmds = { "Man", "!" },
 						},
+						matching = { disallow_symbol_nonprefix_matching = false }
 					},
 				}),
 			})
@@ -60,7 +62,6 @@ return {
 					{ name = "nvim_lsp", group_index = 2 },
 					{ name = "buffer", group_index = 2 },
 					{ name = "path", group_index = 2 },
-					{ name = "cmdline", group_index = 2 },
 				},
 				experimental = {
 					-- only show ghost text when we show ai completions
