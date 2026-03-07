@@ -17,6 +17,16 @@ return {
 				path = "~/vaults/work",
 			},
 		},
+		note_id_func = function(title)
+			if title ~= nil then
+				-- If title is given, use it as the filename.
+				-- You can optionally add string replacements here to sanitize it if needed.
+				return title
+			else
+				-- If title is nil, just generate a random timestamp/ID.
+				return tostring(os.time())
+			end
+		end,
 		callbacks = {
 			enter_note = function(client, note)
 				local map = function(key, cmd, desc)
