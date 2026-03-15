@@ -1,4 +1,5 @@
 [
   "definition-list",
-  "templater-obsidian"
+  "templater-obsidian",
+  "obsidian-vimrc-support"
 ]
