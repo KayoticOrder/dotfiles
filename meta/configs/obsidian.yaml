@@ -1,0 +1,6 @@
+- omnipkg:
+    - install: [obsidian]
+
+- link:
+    ~/vaults/personal/.obsidian: dots/obsidian/vaults/personal/.obsidian
+    ~/vaults/personal/templates: dots/obsidian/vaults/personal/templates

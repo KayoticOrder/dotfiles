@@ -1,0 +1,11 @@
+{
+  "cssTheme": "Obsidian gruvbox",
+  "enabledCssSnippets": [
+    "spellcheck"
+  ],
+  "interfaceFontFamily": "Iosevka Nerd Font,SFMono Nerd Font Mono",
+  "theme": "obsidian",
+  "baseFontSize": 16,
+  "nativeMenus": false,
+  "accentColor": "#6c8999"
+}
