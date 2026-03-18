@@ -4,4 +4,5 @@
 - link:
     ~/vaults/personal/.obsidian: dots/obsidian/vaults/personal/.obsidian
     ~/vaults/personal/templates: dots/obsidian/vaults/personal/templates
+    ~/vaults/personal/scripts: dots/obsidian/vaults/personal/scripts
     ~/vaults/personal/.obsidian.vimrc: dots/obsidian/vaults/personal/.obsidian.vimrc
