@@ -1,6 +1,6 @@
 {
   "command_timeout": 5,
-  "templates_folder": "templates",
+  "templates_folder": "",
   "templates_pairs": [
     [
       "",
@@ -9,9 +9,9 @@
   ],
   "trigger_on_file_creation": false,
   "auto_jump_to_cursor": false,
-  "enable_system_commands": false,
+  "enable_system_commands": true,
   "shell_path": "",
-  "user_scripts_folder": "",
+  "user_scripts_folder": "scripts",
   "enable_folder_templates": true,
   "folder_templates": [
     {
@@ -30,9 +30,11 @@
   "syntax_highlighting_mobile": false,
   "enabled_templates_hotkeys": [
     "templates/default-note.md",
+    "templates/create-term-from-link.md",
     ""
   ],
   "startup_templates": [
+    "templates/startup.md",
     ""
   ],
   "intellisense_render": 1

@@ -1,14 +1,12 @@
 <%*
 const title = await tp.system.prompt("Note name");
-const id = title.toLowerCase().replace(/\s+/g, "-");
+const id = tp.user.util.slugify(title);
 await tp.file.rename(id);
-
-tR += `---
-id: ${id}
+-%>
+---
+id: <% id %>
 tags:
 categories:
-created: ${tp.date.now("YYYY-MM-DD HH:mm")}
+created: <% tp.date.now("YYYY-MM-DD HH:mm") %>
 ---
-# ${title}
-`;
-%>
+# <% title %>
