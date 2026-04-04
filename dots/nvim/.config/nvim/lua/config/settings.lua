@@ -14,6 +14,11 @@ opt.list = true -- Show invisible characters
 opt.listchars:append({
 	tab = "▏ ",
 })
+opt.wildmenu = true
+opt.wildmode = "longest:full,full"
+opt.wildoptions = "pum,fuzzy"
+opt.wildignorecase = true
+opt.pumheight = 12
 
 opt.number = true
 opt.relativenumber = false

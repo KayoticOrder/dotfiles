@@ -22,8 +22,67 @@ return {
 			local auto_select = true
 			require("copilot_cmp").setup()
 
+			local fuzzy_matching = {
+				disallow_fuzzy_matching = false,
+				disallow_fullfuzzy_matching = false,
+				disallow_partial_fuzzy_matching = false,
+				disallow_partial_matching = false,
+				disallow_prefix_unmatching = false,
+				disallow_symbol_nonprefix_matching = false,
+			}
+
+			local function select_next(fallback)
+				if cmp.visible() then
+					cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+				else
+					fallback()
+				end
+			end
+
+			local function select_prev(fallback)
+				if cmp.visible() then
+					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+				else
+					fallback()
+				end
+			end
+
+			local function confirm_selection(fallback)
+				if cmp.visible() then
+					cmp.confirm({ select = true })
+				else
+					fallback()
+				end
+			end
+
+			local function close_completion(fallback)
+				if cmp.visible() then
+					cmp.close()
+				else
+					fallback()
+				end
+			end
+
+			local cmdline_mapping = cmp.mapping.preset.cmdline({
+				["<C-j>"] = { c = select_prev },
+				["<C-k>"] = { c = select_next },
+				["<C-h>"] = { c = close_completion },
+				["<C-l>"] = { c = confirm_selection },
+				["<C-f>"] = { c = confirm_selection },
+				["<C-CR>"] = { c = confirm_selection },
+			})
+
+			cmp.setup.cmdline({ "/", "?" }, {
+				mapping = cmdline_mapping,
+				matching = fuzzy_matching,
+				sources = {
+					{ name = "buffer" },
+				},
+			})
+
 			cmp.setup.cmdline(":", {
-				mapping = cmp.mapping.preset.cmdline(),
+				mapping = cmdline_mapping,
+				matching = fuzzy_matching,
 				sources = cmp.config.sources({
 					{ name = "path" },
 				}, {
@@ -32,7 +91,7 @@ return {
 						option = {
 							ignore_cmds = { "Man", "!" },
 						},
-						matching = { disallow_symbol_nonprefix_matching = false }
+						matching = fuzzy_matching,
 					},
 				}),
 			})
@@ -46,15 +105,20 @@ return {
 					completeopt = "menu,menuone,noinsert" .. (auto_select and "" or ",noselect"),
 				},
 				view = {
-					entries = "custom",
+					entries = {
+						name = "custom",
+						selection_order = "near_cursor",
+					},
 				},
 				preselect = auto_select and cmp.PreselectMode.Item or cmp.PreselectMode.None,
 				mapping = cmp.mapping.preset.insert({
-					["<C-f>"] = cmp.mapping.confirm(),
+					["<C-f>"] = cmp.mapping.confirm({ select = true }),
 					["<C-Space>"] = cmp.mapping.complete(),
 					["<C-e>"] = cmp.mapping.close(),
-					["<C-j>"] = cmp.mapping.select_next_item(),
-					["<C-k>"] = cmp.mapping.select_prev_item(),
+					["<C-j>"] = cmp.mapping.select_prev_item(),
+					["<C-k>"] = cmp.mapping.select_next_item(),
+					["<C-l>"] = cmp.mapping.confirm({ select = true }),
+					["<C-CR>"] = cmp.mapping.confirm({ select = true }),
 					["<CR>"] = cmp.mapping.disable,
 				}),
 				sources = {

@@ -10,11 +10,61 @@ return {
 	keys = function()
 		local tb = require("telescope.builtin")
 		local ts = require("telescope")
+		local make_entry = require("telescope.make_entry")
+		local entry_display = require("telescope.pickers.entry_display")
+
+		local command_displayer = entry_display.create({
+			separator = " ",
+			items = {
+				{ width = 24 },
+				{ remaining = true },
+			},
+		})
+
+		local function command_picker()
+			local function format_command_description(entry)
+				local description = entry.desc or entry.definition
+				if description and description ~= "" then
+					return description:gsub("\n", " ")
+				end
+
+				local details = {}
+				if entry.complete and entry.complete ~= "" then
+					table.insert(details, entry.complete == "<Lua function>" and "custom completion" or entry.complete)
+				end
+				if entry.nargs and entry.nargs ~= "" and entry.nargs ~= "0" then
+					table.insert(details, string.format("args: %s", entry.nargs))
+				end
+
+				return #details > 0 and table.concat(details, " · ") or "No description"
+			end
+
+			tb.commands({
+				entry_maker = function(entry)
+					local description = format_command_description(entry)
+					return make_entry.set_default_entry_mt({
+						name = entry.name,
+						description = description,
+						value = entry,
+						ordinal = string.format("%s %s", entry.name, description),
+						display = function(item)
+							return command_displayer({
+								{ item.name, "TelescopeResultsIdentifier" },
+								item.description,
+							})
+						end,
+					}, {})
+				end,
+			})
+		end
+
 		return {
 			{ "<leader>fz", tb.find_files, desc = "Fuzzy Files" },
 			{ "<leader>ff", "<cmd>Telescope frecency workspace=CWD<cr>", desc = "Files" },
 			{ "<leader>fg", tb.live_grep, desc = "Grep" },
 			{ "<leader>fb", tb.buffers, desc = "Buffers" },
+			{ "<leader>fc", command_picker, desc = "Commands" },
+			{ "<leader>f:", tb.command_history, desc = "Command History" },
 			{ "<leader>fh", tb.help_tags, desc = "Help Tags" },
 			{ "<leader>fm", tb.keymaps, desc = "Keymaps" },
 			{ "<leader>fs", tb.lsp_document_symbols, desc = "Symbols" },
