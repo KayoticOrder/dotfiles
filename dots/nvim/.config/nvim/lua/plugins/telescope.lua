@@ -30,7 +30,10 @@ return {
 
 				local details = {}
 				if entry.complete and entry.complete ~= "" then
-					table.insert(details, entry.complete == "<Lua function>" and "custom completion" or entry.complete)
+					table.insert(
+						details,
+						entry.complete == "<Lua function>" and "custom completion" or entry.complete
+					)
 				end
 				if entry.nargs and entry.nargs ~= "" and entry.nargs ~= "0" then
 					table.insert(details, string.format("args: %s", entry.nargs))
@@ -65,7 +68,14 @@ return {
 			{ "<leader>fb", tb.buffers, desc = "Buffers" },
 			{ "<leader>fc", command_picker, desc = "Commands" },
 			{ "<leader>f:", tb.command_history, desc = "Command History" },
-			{ "<leader>fh", tb.help_tags, desc = "Help Tags" },
+			{
+				"<leader>fh",
+				function()
+					ts.extensions.harpoon.marks({ prompt_title = "Harpoon Marks" })
+				end,
+				desc = "Harpoon Marks",
+			},
+			{ "<leader>f?", tb.help_tags, desc = "Help Tags" },
 			{ "<leader>fm", tb.keymaps, desc = "Keymaps" },
 			{ "<leader>fs", tb.lsp_document_symbols, desc = "Symbols" },
 			{ "<leader>fu", ts.extensions.undo.undo, desc = "Undo History" },
@@ -222,5 +232,6 @@ return {
 		ts.load_extension("fzf")
 		ts.load_extension("undo")
 		ts.load_extension("frecency")
+		pcall(ts.load_extension, "harpoon")
 	end,
 }
