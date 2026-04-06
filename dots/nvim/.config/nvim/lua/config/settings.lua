@@ -1,6 +1,6 @@
 local opt = vim.opt
 
-vim.cmd("colorscheme gruvbox-material")
+vim.cmd("colorscheme kanagawa-wave")
 
 opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
 opt.expandtab = true -- Use spaces instead of tabs
