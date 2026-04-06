@@ -1,91 +1,107 @@
 return {
-	"https://github.com/theprimeagen/harpoon",
+	"ThePrimeagen/harpoon",
+	branch = "harpoon2",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 	},
-	keys = {
-		{
-			"<leader>ha",
-			function()
-				require("harpoon.mark").add_file()
-			end,
-			desc = "Add File",
-		},
-		{
-			"<leader>hh",
-			function()
-				require("harpoon.ui").toggle_quick_menu()
-			end,
-			desc = "Menu",
-		},
-		{
-			"]h",
-			function()
-				require("harpoon.ui").nav_next()
-			end,
-			desc = "Next Harpoon File",
-		},
-		{
-			"[h",
-			function()
-				require("harpoon.ui").nav_prev()
-			end,
-			desc = "Prev Harpoon File",
-		},
-		{
-			"<leader>1",
-			function()
-				require("harpoon.ui").nav_file(1)
-			end,
-			desc = "Harpoon File 1",
-		},
-		{
-			"<leader>2",
-			function()
-				require("harpoon.ui").nav_file(2)
-			end,
-			desc = "Harpoon File 2",
-		},
-		{
-			"<leader>3",
-			function()
-				require("harpoon.ui").nav_file(3)
-			end,
-			desc = "Harpoon File 3",
-		},
-		{
-			"<leader>4",
-			function()
-				require("harpoon.ui").nav_file(4)
-			end,
-			desc = "Harpoon File 4",
-		},
-		{
-			"<leader>5",
-			function()
-				require("harpoon.ui").nav_file(5)
-			end,
-			desc = "Harpoon File 5",
-		},
-	},
-	config = function()
-		require("harpoon").setup({
-			global_settings = {
-				save_on_toggle = true,
-				save_on_change = true,
-				enter_on_sendcmd = false,
-				mark_branch = true,
-				excluded_filetypes = {
-					"harpoon",
-					"TelescopePrompt",
-					"neo-tree",
-					"NvimTree",
-					"help",
-				},
+	keys = function()
+		local harpoon = require("harpoon")
+		local keys = {
+			{
+				"<leader>ha",
+				function()
+					harpoon:list():add()
+				end,
+				desc = "Add File",
 			},
-			menu = {
-				width = math.min(vim.api.nvim_win_get_width(0) - 4, 100),
+			{
+				"<leader>hh",
+				function()
+					harpoon.ui:toggle_quick_menu(harpoon:list())
+				end,
+				desc = "Menu",
+			},
+			{
+				"]h",
+				function()
+					harpoon:list():next()
+				end,
+				desc = "Next Harpoon File",
+			},
+			{
+				"[h",
+				function()
+					harpoon:list():prev()
+				end,
+				desc = "Prev Harpoon File",
+			},
+		}
+
+		for i = 1, 5 do
+			keys[#keys + 1] = {
+				string.format("<leader>%d", i),
+				function()
+					harpoon:list():select(i)
+				end,
+				desc = string.format("Harpoon File %d", i),
+			}
+
+			keys[#keys + 1] = {
+				string.format("<leader>h%d", i),
+				function()
+					harpoon:list():replace_at(i)
+				end,
+				desc = string.format("Assign File to Slot %d", i),
+			}
+		end
+
+		return keys
+	end,
+	config = function()
+		local harpoon = require("harpoon")
+		local ok_extensions, extensions = pcall(require, "harpoon.extensions")
+
+		local function harpoon_key()
+			local cwd = vim.loop.cwd()
+			local git_root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
+
+			if vim.v.shell_error ~= 0 or not git_root or git_root == "" then
+				return cwd
+			end
+
+			local branch = vim.fn.systemlist({ "git", "branch", "--show-current" })[1]
+			if vim.v.shell_error ~= 0 or not branch or branch == "" then
+				return git_root
+			end
+
+			return string.format("%s::%s", git_root, branch)
+		end
+
+		harpoon:setup({
+			settings = {
+				save_on_toggle = true,
+				sync_on_ui_close = true,
+				key = harpoon_key,
 			},
 		})
+
+		if ok_extensions and type(harpoon.extend) == "function" then
+			harpoon:extend(extensions.builtins.highlight_current_file())
+			harpoon:extend({
+				UI_CREATE = function(cx)
+					vim.keymap.set("n", "<C-v>", function()
+						harpoon.ui:select_menu_item({ vsplit = true })
+					end, { buffer = cx.bufnr, desc = "Open in vertical split" })
+
+					vim.keymap.set("n", "<C-x>", function()
+						harpoon.ui:select_menu_item({ split = true })
+					end, { buffer = cx.bufnr, desc = "Open in horizontal split" })
+
+					vim.keymap.set("n", "<C-t>", function()
+						harpoon.ui:select_menu_item({ tabedit = true })
+					end, { buffer = cx.bufnr, desc = "Open in new tab" })
+				end,
+			})
+		end
 	end,
 }

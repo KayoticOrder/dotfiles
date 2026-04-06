@@ -61,6 +61,24 @@ return {
 			})
 		end
 
+		local function harpoon_picker()
+			local harpoon = require("harpoon")
+			local conf = require("telescope.config").values
+			local file_paths = vim.tbl_map(function(item)
+				return item.value
+			end, harpoon:list().items)
+
+			require("telescope.pickers")
+				.new({ previewer = false }, {
+					prompt_title = "Harpoon Marks",
+					finder = require("telescope.finders").new_table({
+						results = file_paths,
+					}),
+					sorter = conf.generic_sorter({}),
+				})
+				:find()
+		end
+
 		return {
 			{ "<leader>fz", tb.find_files, desc = "Fuzzy Files" },
 			{ "<leader>ff", "<cmd>Telescope frecency workspace=CWD<cr>", desc = "Files" },
@@ -68,13 +86,7 @@ return {
 			{ "<leader>fb", tb.buffers, desc = "Buffers" },
 			{ "<leader>fc", command_picker, desc = "Commands" },
 			{ "<leader>f:", tb.command_history, desc = "Command History" },
-			{
-				"<leader>fh",
-				function()
-					ts.extensions.harpoon.marks({ prompt_title = "Harpoon Marks" })
-				end,
-				desc = "Harpoon Marks",
-			},
+			{ "<leader>fh", harpoon_picker, desc = "Harpoon Marks" },
 			{ "<leader>f?", tb.help_tags, desc = "Help Tags" },
 			{ "<leader>fm", tb.keymaps, desc = "Keymaps" },
 			{ "<leader>fs", tb.lsp_document_symbols, desc = "Symbols" },
@@ -232,6 +244,5 @@ return {
 		ts.load_extension("fzf")
 		ts.load_extension("undo")
 		ts.load_extension("frecency")
-		pcall(ts.load_extension, "harpoon")
 	end,
 }
