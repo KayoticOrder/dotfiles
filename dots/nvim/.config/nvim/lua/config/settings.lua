@@ -21,7 +21,7 @@ opt.wildignorecase = true
 opt.pumheight = 12
 
 opt.number = true
-opt.relativenumber = false
+opt.relativenumber = true
 opt.cursorline = true
 
 opt.undofile = true
