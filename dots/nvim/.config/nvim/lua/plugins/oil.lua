@@ -4,7 +4,6 @@ return {
 	---@type oil.SetupOpts
 	keys = {
 		{ "<leader>oo", "<cmd>Oil<cr>", desc = "Open Oil" },
-		{ "<leader>of", "<cmd>Oil --float<cr>", desc = "Open Oil (float)" },
 	},
 	opts = {
 		-- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
@@ -66,30 +65,21 @@ return {
 		-- Set to `false` to remove a keymap
 		-- See :help oil-actions for a list of all available actions
 		keymaps = {
-			["g?"] = false,
-			["?"] = { "actions.show_help", mode = "n" },
+			["g?"] = { "actions.show_help", mode = "n" },
 			["<CR>"] = "actions.select",
-			["l"] = "actions.select",
-			["<C-s>"] = false,
-			["<C-h>"] = false,
-			["<C-l>"] = false,
-			["<C-c>"] = false,
-			["<C-p>"] = false,
-			["<C-v>"] = { "actions.select", opts = { vertical = true } },
-			["<C-x>"] = { "actions.select", opts = { horizontal = true } },
+			["<C-s>"] = { "actions.select", opts = { vertical = true } },
+			["<C-h>"] = { "actions.select", opts = { horizontal = true } },
 			["<C-t>"] = { "actions.select", opts = { tab = true } },
-			["h"] = { "actions.parent", mode = "n" },
+			["<C-p>"] = "actions.preview",
+			["<C-c>"] = { "actions.close", mode = "n" },
+			["<C-l>"] = "actions.refresh",
 			["-"] = { "actions.parent", mode = "n" },
-			["P"] = "actions.preview",
-			["q"] = { "actions.close", mode = "n" },
-			["R"] = "actions.refresh",
 			["_"] = { "actions.open_cwd", mode = "n" },
 			["`"] = { "actions.cd", mode = "n" },
 			["g~"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
 			["gs"] = { "actions.change_sort", mode = "n" },
 			["gx"] = "actions.open_external",
-			["g."] = false,
-			["."] = { "actions.toggle_hidden", mode = "n" },
+			["g."] = { "actions.toggle_hidden", mode = "n" },
 			["g\\"] = { "actions.toggle_trash", mode = "n" },
 		},
 		-- Set to false to disable all of the above keymaps
