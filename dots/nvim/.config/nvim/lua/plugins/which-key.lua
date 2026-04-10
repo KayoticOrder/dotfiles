@@ -11,6 +11,7 @@ return {
 				{ "<leader>f", group = "file/find" },
 				{ "<leader>g", group = "git" },
 				{ "<leader>gh", group = "hunks" },
+				{ "<leader>o", group = "oil" },
 				{ "<leader>h", group = "harpoon" },
 				{ "<leader>q", group = "quit/session" },
 				{ "<leader>s", group = "search" },
