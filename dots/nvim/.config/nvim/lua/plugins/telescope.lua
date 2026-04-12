@@ -210,7 +210,7 @@ return {
 					prompt_title = "Find Files",
 					workspace = "CWD",
 					show_scores = false,
-					show_unindexed = true,
+					show_unindexed = false,
 					matcher = "fuzzy",
 					show_filter_column = false,
 					mappings = {
