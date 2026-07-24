@@ -3,6 +3,11 @@ vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move to bottom window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move to top window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
+vim.keymap.set("v", "*", [[y/\V<C-r>=escape(@",'/\')<CR><CR>]], {
+	noremap = true,
+	silent = true,
+	desc = "Search for selected text",
+})
 
 vim.keymap.set("n", "<leader>cd", function()
 	vim.diagnostic.open_float(nil, {
