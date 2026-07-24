@@ -126,7 +126,7 @@ set -o ignoreeof
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-eval "$(zoxide init zsh --cmd cd)"
+eval "$(zoxide init zsh --cmd z)"
 
 # Created by `pipx` on 2025-06-07 17:10:27
 export PATH="$PATH:/home/kayotic/.local/bin"
