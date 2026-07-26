@@ -1,10 +1,28 @@
-# Iosevka Nerd Font, used by the alacritty/kitty configs. Arch has it in the
-# official `extra` repo (no AUR needed); apt doesn't package it at all, so it
-# falls back to grabbing the release zip straight from nerd-fonts upstream.
-- omnipkg:
-  - install:
-    - { pac: "ttf-iosevka-nerd" }
-    - { pac: "ttf-iosevkaterm-nerd" }
-
+# Downloaded directly from upstream, no package manager involved - works
+# identically on every distro. Two separate families are needed:
+#   - "Iosevka Nerd Font" (icon glyphs) - alacritty's font.normal
+#     from ryanoasis/nerd-fonts, which patches Iosevka to add the icons.
+#   - "Iosevka Term" - alacritty's font.bold and kitty's font_family
+#     from be5invis/Iosevka's own release (the *upstream* project); this
+#     zip also contains the base "Iosevka" and "Iosevka Fixed" families.
+# Both are pinned to a specific version rather than "latest" so a fresh
+# install is reproducible. Bump these by hand when you want an update.
 - shell:
-  - [ "test -f /etc/debian_version && mkdir -p ~/.local/share/fonts/NerdFonts && curl -fLo /tmp/Iosevka.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Iosevka.zip && curl -fLo /tmp/IosevkaTerm.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/IosevkaTerm.zip && python3 -m zipfile -e /tmp/Iosevka.zip ~/.local/share/fonts/NerdFonts && python3 -m zipfile -e /tmp/IosevkaTerm.zip ~/.local/share/fonts/NerdFonts && rm -f /tmp/Iosevka.zip /tmp/IosevkaTerm.zip && fc-cache -f || true" ]
+  - command: |
+      mkdir -p ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka
+      rc=0
+      if [ ! -f ~/.local/share/fonts/NerdFonts/IosevkaNerdFont-Regular.ttf ]; then
+        curl -fLo /tmp/iosevka-nerd.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Iosevka.zip \
+          && python3 -m zipfile -e /tmp/iosevka-nerd.zip ~/.local/share/fonts/NerdFonts \
+          && rm -f /tmp/iosevka-nerd.zip \
+          || rc=1
+      fi
+      if [ ! -f ~/.local/share/fonts/Iosevka/Iosevka-Regular.ttc ]; then
+        curl -fLo /tmp/iosevka.zip https://github.com/be5invis/Iosevka/releases/download/v34.8.0/PkgTTC-Iosevka-34.8.0.zip \
+          && python3 -m zipfile -e /tmp/iosevka.zip ~/.local/share/fonts/Iosevka \
+          && rm -f /tmp/iosevka.zip \
+          || rc=1
+      fi
+      fc-cache -f
+      exit $rc
+    description: "Download Iosevka Nerd Font + Iosevka Term directly from upstream"

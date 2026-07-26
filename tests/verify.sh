@@ -52,6 +52,7 @@ check_font() {
 
 verify_fonts() {
   check_font "iosevka.*nerd"
+  check_font "iosevka term"
 }
 
 verify_alacritty() {
