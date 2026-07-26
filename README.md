@@ -50,6 +50,24 @@ Both scripts run `git submodule update --init --recursive` automatically, then a
 - `meta/plugins/omnipkg.py` — custom Dotbot plugin that installs packages via whatever package manager is present (pacman, apt, dnf, or Homebrew).
 - `meta/plugins/yay.py` — custom Dotbot plugin for AUR packages via `yay`.
 
+## Adding a config
+
+1. Put the files under `dots/<name>/`, mirroring where they should end up (e.g. `dots/foo/.config/foo/...`).
+2. Add `meta/configs/<name>.yaml` with an `omnipkg install` list and a `link` block (see any existing file for the shape).
+3. If it needs a plugin/theme repo, add it as a submodule: `git submodule add <url> dots/<name>/.config/<name>/<subpath>`.
+4. Add a `verify_<name>` function to `tests/verify.sh` (checks the symlink(s) resolve and the binary is on `PATH`).
+5. Add `<name>` to the `configs.strategy.matrix.config` list in `.github/workflows/test.yml` for CI coverage (use `include:` instead if it only applies to one distro, like `hypr`).
+6. Add it to any `meta/profiles/<profile>` file(s) it belongs in, or leave it out for a standalone-only config (see `claude`/`obsidian`).
+7. Add a row to the Contents table above.
+
+## Adding a profile
+
+1. Add `meta/profiles/<name>`, one config per line (`#` comments out a line). By convention the first line is a same-named bootstrap config.
+2. Add `meta/configs/<name>.yaml` for that bootstrap line — can be empty (see `arch.yaml`/`ubuntu.yaml`).
+3. Confirm `meta/plugins/omnipkg.py` supports the platform's package manager (currently pacman, apt, dnf, Homebrew) — a new package manager needs a new `_setup*`/`_selectPackageManager` branch there.
+4. If you want CI coverage, add `tests/<name>/Dockerfile` (copy an existing one, swap the package-manager bootstrap) and add `<name>` to the `distro` matrix in both jobs in `.github/workflows/test.yml`.
+5. Update the profile list and Testing section in this README.
+
 ## Testing
 
 `tests/<distro>/Dockerfile` (currently `arch` and `ubuntu`) builds a clean container, runs the profile or an individual config against it, then runs `tests/verify.sh` to confirm the expected symlinks and binaries actually exist — for verifying changes without touching the host machine:
