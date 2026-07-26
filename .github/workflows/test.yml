@@ -1,0 +1,70 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  CACHE_SCOPE: dotfiles
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [arch, ubuntu]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and verify ${{ matrix.distro }} profile
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: tests/${{ matrix.distro }}/Dockerfile
+          push: false
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
+          build-args: |
+            INSTALLER=install-profile
+            TARGET=${{ matrix.distro }}
+            VERIFY_ARGS=--profile ${{ matrix.distro }}
+
+  configs:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [arch, ubuntu]
+        config: [alacritty, kitty, nvim, tmux, zsh]
+        # hypr isn't in Ubuntu's official archives, so it's Arch-only for now
+        include:
+          - distro: arch
+            config: hypr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and verify ${{ matrix.distro }}/${{ matrix.config }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: tests/${{ matrix.distro }}/Dockerfile
+          push: false
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
+          build-args: |
+            INSTALLER=install-standalone
+            TARGET=${{ matrix.config }}
+            VERIFY_ARGS=${{ matrix.config }}

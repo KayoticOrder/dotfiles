@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Post-install checks: confirms configs actually got symlinked into the repo
+# (not just that the install script exited 0) and that the packages each
+# config installs are on PATH. Platform-agnostic - shared by every
+# tests/<platform>/Dockerfile, since a symlink/PATH check doesn't care which
+# distro produced it.
+#
+# Usage:
+#   verify.sh                    check every config that has a verify_<name> function
+#   verify.sh <config> [config...]   check only the given configs
+#   verify.sh --profile <name>   check every config listed in meta/profiles/<name>;
+#                                 entries with no verify_<name> function (e.g. the
+#                                 bootstrap "arch"/"ubuntu" line) are skipped, not failed
+set -uo pipefail
+
+fail=0
+
+check_link() {
+  local link="$1" expect_substr="$2"
+  if [[ ! -L "$link" ]]; then
+    echo "FAIL: $link is not a symlink"
+    fail=1
+    return
+  fi
+  local target
+  target="$(readlink -f "$link")"
+  if [[ "$target" != *"$expect_substr"* ]]; then
+    echo "FAIL: $link -> $target (expected to contain $expect_substr)"
+    fail=1
+    return
+  fi
+  echo "OK: $link -> $target"
+}
+
+check_bin() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "FAIL: $1 not found on PATH"
+    fail=1
+    return
+  fi
+  echo "OK: $1 found on PATH"
+}
+
+verify_alacritty() {
+  check_link "$HOME/.config/alacritty" "dots/alacritty/.config/alacritty"
+  check_bin alacritty
+}
+
+verify_hypr() {
+  check_link "$HOME/.config/hypr" "dots/hypr/.config/hypr"
+  check_link "$HOME/.config/rofi" "dots/hypr/.config/rofi"
+  check_link "$HOME/.config/waybar" "dots/hypr/.config/waybar"
+  check_bin Hyprland
+  check_bin waybar
+  check_bin rofi
+}
+
+verify_kitty() {
+  check_link "$HOME/.config/kitty" "dots/kitty/.config/kitty"
+  check_bin kitty
+}
+
+verify_nvim() {
+  check_link "$HOME/.config/nvim" "dots/nvim/.config/nvim"
+  check_bin nvim
+}
+
+verify_tmux() {
+  check_link "$HOME/.config/tmux" "dots/tmux/.config/tmux"
+  check_bin tmux
+}
+
+verify_zsh() {
+  check_link "$HOME/.zshrc" "dots/zsh/.zshrc"
+  check_bin zsh
+}
+
+strict=true
+if [[ "${1:-}" == "--profile" ]]; then
+  profile="${2:?--profile requires a profile name}"
+  repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  mapfile -t configs < <(grep -v '^#' "${repo_root}/meta/profiles/${profile}")
+  strict=false
+elif [[ $# -gt 0 ]]; then
+  configs=("$@")
+else
+  mapfile -t configs < <(declare -F | awk '{print $3}' | sed -n 's/^verify_//p')
+fi
+
+for config in "${configs[@]}"; do
+  if declare -f "verify_${config}" >/dev/null; then
+    "verify_${config}"
+  elif [[ "$strict" == true ]]; then
+    echo "FAIL: no verification defined for config '$config'"
+    fail=1
+  else
+    echo "SKIP: '$config' has no linked config to verify"
+  fi
+done
+
+exit "$fail"
