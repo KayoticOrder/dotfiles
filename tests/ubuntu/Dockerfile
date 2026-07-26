@@ -3,7 +3,7 @@ FROM ubuntu:latest
 # Update package lists and install what the install scripts + omnipkg need
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl sudo git ca-certificates bash python3 python3-pip build-essential && \
+      curl sudo git ca-certificates bash python3 python3-pip build-essential fontconfig && \
     rm -rf /var/lib/apt/lists/*
 
 # Add a non-root user

@@ -8,7 +8,7 @@ RUN pacman -Sy --noconfirm archlinux-keyring && \
 
 # Clear pacman cache and install essential packages
 RUN pacman -Scc --noconfirm && \
-    pacman -S --noconfirm curl sudo git bash python3 python-pip gcc
+    pacman -S --noconfirm curl sudo git bash python3 python-pip gcc fontconfig
 
 # Add a non-root user
 RUN useradd -ms /bin/bash testuser && echo "testuser:testuser" | chpasswd && usermod -aG wheel testuser && \

@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         distro: [arch, ubuntu]
-        config: [alacritty, kitty, nvim, tmux, zsh]
+        config: [alacritty, fonts, kitty, nvim, tmux, zsh]
         # hypr isn't in Ubuntu's official archives, so it's Arch-only for now
         include:
           - distro: arch

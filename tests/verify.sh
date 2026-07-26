@@ -41,6 +41,19 @@ check_bin() {
   echo "OK: $1 found on PATH"
 }
 
+check_font() {
+  if ! fc-list | grep -qi "$1"; then
+    echo "FAIL: no font matching '$1' found"
+    fail=1
+    return
+  fi
+  echo "OK: font matching '$1' found"
+}
+
+verify_fonts() {
+  check_font "iosevka.*nerd"
+}
+
 verify_alacritty() {
   check_link "$HOME/.config/alacritty" "dots/alacritty/.config/alacritty"
   check_bin alacritty

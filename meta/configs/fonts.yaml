@@ -1,0 +1,10 @@
+# Iosevka Nerd Font, used by the alacritty/kitty configs. Arch has it in the
+# official `extra` repo (no AUR needed); apt doesn't package it at all, so it
+# falls back to grabbing the release zip straight from nerd-fonts upstream.
+- omnipkg:
+  - install:
+    - { pac: "ttf-iosevka-nerd" }
+    - { pac: "ttf-iosevkaterm-nerd" }
+
+- shell:
+  - [ "test -f /etc/debian_version && mkdir -p ~/.local/share/fonts/NerdFonts && curl -fLo /tmp/Iosevka.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Iosevka.zip && curl -fLo /tmp/IosevkaTerm.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/IosevkaTerm.zip && python3 -m zipfile -e /tmp/Iosevka.zip ~/.local/share/fonts/NerdFonts && python3 -m zipfile -e /tmp/IosevkaTerm.zip ~/.local/share/fonts/NerdFonts && rm -f /tmp/Iosevka.zip /tmp/IosevkaTerm.zip && fc-cache -f || true" ]

@@ -5,8 +5,8 @@ description: Add a new tool config or platform profile to this dotbot-based dotf
 
 # Adding a config
 
-1. `dots/<name>/` — put the actual files where they should end up relative to `$HOME`, e.g. `dots/<name>/.config/<name>/...`.
-2. `meta/configs/<name>.yaml` — an `omnipkg install` list plus a `link` block. Copy the shape from an existing file (e.g. `meta/configs/kitty.yaml`). If the tool isn't installed via a system package manager (npm-based, etc.), omit the `omnipkg` block entirely — see `claude.yaml`.
+1. `dots/<name>/` — put the actual files where they should end up relative to `$HOME`, e.g. `dots/<name>/.config/<name>/...`. Not every config needs this — a pure package install (e.g. `fonts.yaml`) has no `dots/fonts/` at all.
+2. `meta/configs/<name>.yaml` — an `omnipkg install` list and/or a `link` block; a config can have either or both. Copy the shape from an existing file. `claude.yaml` is link-only (npm-installed tool, no system package). `fonts.yaml` is install-only (no files to symlink) and shows the dict form of `omnipkg install` (`{pac: ..., apt: ..., else: ...}`) for packages that don't exist under the same name (or at all) on every package manager — omitted keys are skipped gracefully rather than erroring, and a `shell:` step can fill the gap for a manager with no package at all.
 3. Vendored plugin/theme repo: add it as a submodule, `git submodule add <url> dots/<name>/.config/<name>/<subpath>`.
 4. `tests/verify.sh` — add a `verify_<name>` function using `check_link`/`check_bin` for every path this config symlinks and every binary it installs.
 5. `.github/workflows/test.yml` — add `<name>` to `configs.strategy.matrix.config`. Use `include:` instead if it's distro-specific (see how `hypr` is arch-only there).

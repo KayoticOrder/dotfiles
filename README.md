@@ -8,6 +8,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | --- | --- |
 | `alacritty` | Alacritty terminal + themes |
 | `claude` | Claude Code settings, agents, commands, skills |
+| `fonts` | Iosevka Nerd Font (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
 | `nvim` | Neovim (lazy.nvim config) |
@@ -53,7 +54,7 @@ Both scripts run `git submodule update --init --recursive` automatically, then a
 ## Adding a config
 
 1. Put the files under `dots/<name>/`, mirroring where they should end up (e.g. `dots/foo/.config/foo/...`).
-2. Add `meta/configs/<name>.yaml` with an `omnipkg install` list and a `link` block (see any existing file for the shape).
+2. Add `meta/configs/<name>.yaml` with an `omnipkg install` list and/or a `link` block (see any existing file for the shape; `fonts.yaml` is install-only, `claude.yaml` is link-only).
 3. If it needs a plugin/theme repo, add it as a submodule: `git submodule add <url> dots/<name>/.config/<name>/<subpath>`.
 4. Add a `verify_<name>` function to `tests/verify.sh` (checks the symlink(s) resolve and the binary is on `PATH`).
 5. Add `<name>` to the `configs.strategy.matrix.config` list in `.github/workflows/test.yml` for CI coverage (use `include:` instead if it only applies to one distro, like `hypr`).
