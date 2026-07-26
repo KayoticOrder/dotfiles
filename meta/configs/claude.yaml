@@ -1,0 +1,5 @@
+- link:
+    ~/.claude/settings.json: dots/claude/.claude/settings.json
+    ~/.claude/agents: dots/claude/.claude/agents
+    ~/.claude/commands: dots/claude/.claude/commands
+    ~/.claude/skills: dots/claude/.claude/skills

@@ -7,12 +7,15 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | Config | What it links/installs |
 | --- | --- |
 | `alacritty` | Alacritty terminal + themes |
+| `claude` | Claude Code settings, agents, commands, skills |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
 | `nvim` | Neovim (lazy.nvim config) |
 | `obsidian` | Obsidian vault settings, templates, glossary |
 | `tmux` | tmux + plugins (TPM) |
 | `zsh` | zsh, oh-my-zsh, Powerlevel10k |
+
+`claude` and `obsidian` are standalone-only (not part of any profile) — install them explicitly with `install-standalone` if you want them on a given machine.
 
 Each config lives under `dots/<name>` and is symlinked into place; the matching `meta/configs/<name>.yaml` declares its packages and links.
 
