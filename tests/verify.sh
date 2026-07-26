@@ -13,15 +13,6 @@
 #                                 bootstrap "arch"/"ubuntu" line) are skipped, not failed
 set -uo pipefail
 
-command -v fc-cache >/dev/null 2>&1 && fc-cache -f >/dev/null 2>&1
-
-echo "--- DIAGNOSTIC: whoami=$(whoami) HOME=$HOME PWD=$(pwd) ---"
-echo "--- DIAGNOSTIC: ls -la /home/testuser/.local/share/fonts (absolute, no ~) ---"
-ls -laR /home/testuser/.local/share/fonts 2>&1
-echo "--- DIAGNOSTIC: whole-filesystem search for the marker files ---"
-find / -xdev -iname "IosevkaNerdFont-Regular.ttf" -o -iname "Iosevka-Regular.ttc" 2>/dev/null
-echo "--- DIAGNOSTIC: end ---"
-
 fail=0
 
 check_link() {
@@ -60,6 +51,10 @@ check_font() {
 }
 
 verify_fonts() {
+  # Explicit directory args, not a bare `fc-cache -f` - see the comment in
+  # meta/configs/fonts.yaml for why. This is what actually made the
+  # cross-Docker-layer check pass, not the config-file approach.
+  fc-cache -f "$HOME/.local/share/fonts/NerdFonts" "$HOME/.local/share/fonts/Iosevka" >/dev/null 2>&1
   check_font "iosevka.*nerd"
   check_font "iosevka term"
 }

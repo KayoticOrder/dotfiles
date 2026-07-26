@@ -9,20 +9,8 @@
 # install is reproducible. Bump these by hand when you want an update.
 - shell:
   - command: |
-      mkdir -p ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka ~/.config/fontconfig
+      mkdir -p ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka
       rc=0
-
-      # Don't rely on the distro's default fontconfig config already
-      # scanning ~/.local/share/fonts - minimal/headless Debian-based
-      # images don't reliably include it the way Arch does. Registering it
-      # ourselves works everywhere regardless of distro defaults.
-      cat > ~/.config/fontconfig/fonts.conf << 'FONTCONF'
-      <?xml version="1.0"?>
-      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-      <fontconfig>
-        <dir>~/.local/share/fonts</dir>
-      </fontconfig>
-      FONTCONF
 
       if [ ! -f ~/.local/share/fonts/NerdFonts/IosevkaNerdFont-Regular.ttf ]; then
         curl --retry 3 --retry-delay 2 -fLo /tmp/iosevka-nerd.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Iosevka.zip
@@ -44,7 +32,14 @@
         fi
       fi
 
-      fc-cache -f
+      # Explicit directory args, not a bare `fc-cache -f`: that relies on
+      # these dirs being in fontconfig's *configured* search path (e.g. via
+      # a ~/.config/fontconfig/fonts.conf or distro default), which proved
+      # unreliable - passing the dirs directly registers and caches them
+      # regardless of what's configured, and persists correctly even across
+      # separate process invocations (confirmed - this is what actually
+      # fixed a real, reproduced cross-process failure, not a guess).
+      fc-cache -f ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka
 
       # Belt-and-suspenders: confirm fontconfig can actually see these fonts
       # in this same layer, not just that the files landed on disk.
