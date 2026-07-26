@@ -51,10 +51,17 @@ check_font() {
 }
 
 verify_fonts() {
-  # Explicit directory args, not a bare `fc-cache -f` - see the comment in
-  # meta/configs/fonts.yaml for why. This is what actually made the
-  # cross-Docker-layer check pass, not the config-file approach.
-  fc-cache -f "$HOME/.local/share/fonts/NerdFonts" "$HOME/.local/share/fonts/Iosevka" >/dev/null 2>&1
+  echo "--- DIAGNOSTIC: pre fc-cache, \$HOME/.cache/fontconfig ---"
+  ls -la "$HOME/.cache/fontconfig" 2>&1
+  fc-cache -fv "$HOME/.local/share/fonts/NerdFonts" "$HOME/.local/share/fonts/Iosevka"
+  echo "--- DIAGNOSTIC: fc-cache exit=$? ---"
+  echo "--- DIAGNOSTIC: post fc-cache, \$HOME/.cache/fontconfig ---"
+  ls -la "$HOME/.cache/fontconfig" 2>&1
+  echo "--- DIAGNOSTIC: fc-list full output for these dirs ---"
+  fc-list | grep -i "$HOME/.local/share/fonts" | head -5
+  echo "--- DIAGNOSTIC: fc-cache -V (version/config info) ---"
+  fc-cache -V 2>&1
+  echo "--- DIAGNOSTIC: end ---"
   check_font "iosevka.*nerd"
   check_font "iosevka term"
 }
