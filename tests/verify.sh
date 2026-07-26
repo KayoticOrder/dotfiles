@@ -13,14 +13,14 @@
 #                                 bootstrap "arch"/"ubuntu" line) are skipped, not failed
 set -uo pipefail
 
-# Font checks below use fc-list, which trusts fontconfig's on-disk cache
-# rather than always rescanning. That cache was built in a *different*
-# Docker layer (the install-standalone/install-profile RUN step) - layer
-# commits can shift directory mtimes even for unchanged files, which is
-# enough for fontconfig to treat the cache as stale in ways that don't
-# reproduce outside Docker. Rebuild it fresh here so this doesn't depend on
-# a cache surviving a layer boundary.
 command -v fc-cache >/dev/null 2>&1 && fc-cache -f >/dev/null 2>&1
+
+echo "--- DIAGNOSTIC: whoami=$(whoami) HOME=$HOME PWD=$(pwd) ---"
+echo "--- DIAGNOSTIC: ls -la /home/testuser/.local/share/fonts (absolute, no ~) ---"
+ls -laR /home/testuser/.local/share/fonts 2>&1
+echo "--- DIAGNOSTIC: whole-filesystem search for the marker files ---"
+find / -xdev -iname "IosevkaNerdFont-Regular.ttf" -o -iname "Iosevka-Regular.ttc" 2>/dev/null
+echo "--- DIAGNOSTIC: end ---"
 
 fail=0
 
