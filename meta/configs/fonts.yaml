@@ -36,18 +36,20 @@
       # these dirs being in fontconfig's *configured* search path (e.g. via
       # a ~/.config/fontconfig/fonts.conf or distro default), which proved
       # unreliable - passing the dirs directly registers and caches them
-      # regardless of what's configured, and persists correctly even across
-      # separate process invocations (confirmed - this is what actually
-      # fixed a real, reproduced cross-process failure, not a guess).
+      # regardless of what's configured.
       fc-cache -f ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka
 
-      # Belt-and-suspenders: confirm fontconfig can actually see these fonts
-      # in this same layer, not just that the files landed on disk.
-      if ! fc-list | grep -qi "iosevka.*nerd"; then
+      # Belt-and-suspenders: confirm fontconfig can actually see these fonts,
+      # not just that the files landed on disk. No -q on the grep here: with
+      # pipefail active elsewhere in this repo's scripts, grep -q exiting
+      # early on a match can SIGPIPE fc-list mid-write and get misreported
+      # as a failure even though the match was found - a real bug this
+      # config hit once already (see tests/verify.sh's check_font).
+      if ! fc-list | grep -i "iosevka.*nerd" >/dev/null; then
         echo "ERROR: fc-list can't see Iosevka Nerd Font even though the file exists" >&2
         rc=1
       fi
-      if ! fc-list | grep -qi "iosevka term"; then
+      if ! fc-list | grep -i "iosevka term" >/dev/null; then
         echo "ERROR: fc-list can't see Iosevka Term even though the file exists" >&2
         rc=1
       fi
