@@ -1,0 +1,5 @@
+- omnipkg:
+  - install: [ alacritty ]
+
+- link:
+    ~/.config/alacritty: dots/alacritty/.config/alacritty

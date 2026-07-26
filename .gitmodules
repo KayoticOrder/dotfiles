@@ -22,3 +22,6 @@
 [submodule "dots/tmux/.config/tmux/plugins/vim-tmux-navigator"]
 	path = dots/tmux/.config/tmux/plugins/vim-tmux-navigator
 	url = https://github.com/christoomey/vim-tmux-navigator
+[submodule "dots/alacritty/.config/alacritty/themes"]
+	path = dots/alacritty/.config/alacritty/themes
+	url = https://github.com/alacritty/alacritty-theme

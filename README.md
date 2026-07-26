@@ -6,6 +6,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 
 | Config | What it links/installs |
 | --- | --- |
+| `alacritty` | Alacritty terminal + themes |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
 | `nvim` | Neovim (lazy.nvim config) |

@@ -1,6 +1,7 @@
 arch
 tmux
 kitty
+alacritty
 zsh
 nvim
 hypr
