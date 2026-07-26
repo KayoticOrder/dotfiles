@@ -45,5 +45,17 @@
       fi
 
       fc-cache -f
+
+      # Belt-and-suspenders: confirm fontconfig can actually see these fonts
+      # in this same layer, not just that the files landed on disk.
+      if ! fc-list | grep -qi "iosevka.*nerd"; then
+        echo "ERROR: fc-list can't see Iosevka Nerd Font even though the file exists" >&2
+        rc=1
+      fi
+      if ! fc-list | grep -qi "iosevka term"; then
+        echo "ERROR: fc-list can't see Iosevka Term even though the file exists" >&2
+        rc=1
+      fi
+
       exit $rc
     description: "Download Iosevka Nerd Font + Iosevka Term directly from upstream"

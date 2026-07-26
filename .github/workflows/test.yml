@@ -31,8 +31,12 @@ jobs:
           context: .
           file: tests/${{ matrix.distro }}/Dockerfile
           push: false
-          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
-          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
+          # Unique scope per job - jobs run concurrently, and the GHA cache
+          # backend can serve corrupted/mismatched layers when multiple jobs
+          # write to the same scope at once. Losing cross-job cache sharing
+          # is worth it for build correctness.
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-profile-${{ matrix.distro }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-profile-${{ matrix.distro }}
           build-args: |
             INSTALLER=install-profile
             TARGET=${{ matrix.distro }}
@@ -62,8 +66,9 @@ jobs:
           context: .
           file: tests/${{ matrix.distro }}/Dockerfile
           push: false
-          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
-          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-${{ matrix.distro }}
+          # Unique scope per job - see the note in the profile job above.
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-config-${{ matrix.distro }}-${{ matrix.config }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-config-${{ matrix.distro }}-${{ matrix.config }}
           build-args: |
             INSTALLER=install-standalone
             TARGET=${{ matrix.config }}
