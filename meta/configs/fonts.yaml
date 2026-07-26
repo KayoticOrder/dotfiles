@@ -9,8 +9,20 @@
 # install is reproducible. Bump these by hand when you want an update.
 - shell:
   - command: |
-      mkdir -p ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka
+      mkdir -p ~/.local/share/fonts/NerdFonts ~/.local/share/fonts/Iosevka ~/.config/fontconfig
       rc=0
+
+      # Don't rely on the distro's default fontconfig config already
+      # scanning ~/.local/share/fonts - minimal/headless Debian-based
+      # images don't reliably include it the way Arch does. Registering it
+      # ourselves works everywhere regardless of distro defaults.
+      cat > ~/.config/fontconfig/fonts.conf << 'FONTCONF'
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+      <fontconfig>
+        <dir>~/.local/share/fonts</dir>
+      </fontconfig>
+      FONTCONF
 
       if [ ! -f ~/.local/share/fonts/NerdFonts/IosevkaNerdFont-Regular.ttf ]; then
         curl --retry 3 --retry-delay 2 -fLo /tmp/iosevka-nerd.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Iosevka.zip
