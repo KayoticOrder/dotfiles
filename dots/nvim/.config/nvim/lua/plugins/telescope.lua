@@ -105,7 +105,7 @@ return {
 		local w_pct = 0.90
 		local w_limit = 100
 		local standard_setup = {
-			borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+			borderchars = { "━", "┃", "━", "┃", "┏", "┓", "┛", "┗" },
 			preview = { hide_on_startup = true },
 			layout_strategy = "horizontal",
 			layout_config = {
@@ -124,7 +124,7 @@ return {
 			},
 		}
 		local fullscreen_setup = {
-			borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+			borderchars = { "━", "┃", "━", "┃", "┏", "┓", "┛", "┗" },
 			preview = { hide_on_startup = false },
 			layout_strategy = "flex",
 			layout_config = {
