@@ -3,10 +3,22 @@ return {
 	version = "*", -- use latest release, remove to use latest commit
 	ft = "markdown",
 	dependencies = { "nvim-lua/plenary.nvim" },
+	-- Global entry points: work from any buffer/project, not just inside a note.
+	-- `keys` also lazy-loads the plugin on first press even without a markdown buffer open.
+	keys = {
+		{ "<leader>on", "<cmd>Obsidian new<cr>", desc = "Obsidian: New note" },
+		{ "<leader>od", "<cmd>Obsidian today<cr>", desc = "Obsidian: Today's note" },
+		{ "<leader>oo", "<cmd>Obsidian quick_switch<cr>", desc = "Obsidian: Quick switch" },
+		{ "<leader>og", "<cmd>Obsidian search<cr>", desc = "Obsidian: Grep notes" },
+		{ "<leader>ot", "<cmd>Obsidian new todo<cr>", desc = "Obsidian: Todo list" },
+	},
 	---@module 'obsidian'
 	---@type obsidian.config
 	opts = {
 		legacy_commands = false, -- this will be removed in the next major release
+		ui = {
+			enable = false, -- render-markdown.nvim handles conceal-based rendering instead
+		},
 		workspaces = {
 			{
 				name = "personal",
@@ -34,14 +46,10 @@ return {
 				end
 
 				-- Notes
-				map("<leader>on", "<cmd>Obsidian new<cr>", "Obsidian: New note")
-				map("<leader>oo", "<cmd>Obsidian quick_switch<cr>", "Obsidian: Quick switch")
-				map("<leader>og", "<cmd>Obsidian search<cr>", "Obsidian: Grep notes")
-				map("<leader>ot", "<cmd>Obsidian tags<cr>", "Obsidian: Browse tags")
+				map("<leader>oz", "<cmd>Obsidian tags<cr>", "Obsidian: Browse tags")
 				map("<leader>or", "<cmd>Obsidian rename<cr>", "Obsidian: Rename note")
 
 				-- Daily notes
-				map("<leader>od", "<cmd>Obsidian today<cr>", "Obsidian: Today's note")
 				map("<leader>oD", "<cmd>Obsidian yesterday<cr>", "Obsidian: Yesterday's note")
 				map("<leader>om", "<cmd>Obsidian tomorrow<cr>", "Obsidian: Tomorrow's note")
 

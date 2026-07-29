@@ -3,7 +3,7 @@ return {
 	---@module 'oil'
 	---@type oil.SetupOpts
 	keys = {
-		{ "<leader>oo", "<cmd>Oil<cr>", desc = "Open Oil" },
+		{ "<leader>fe", "<cmd>Oil<cr>", desc = "Open Oil" },
 	},
 	opts = {
 		-- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
