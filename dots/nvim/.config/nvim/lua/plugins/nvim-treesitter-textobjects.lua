@@ -1,27 +1,32 @@
 return {
 	"nvim-treesitter/nvim-treesitter-textobjects",
+	branch = "main",
 	lazy = true,
 	config = function()
-		require("nvim-treesitter.configs").setup({
-			textobjects = {
-				select = {
-					enable = true,
-					lookahead = true,
-					keymaps = {
-						["af"] = { query = "@function.outer", desc = "Select function" },
-						["if"] = { query = "@function.inner", desc = "Select inner function" },
-
-						["ac"] = { query = "@class.outer", desc = "Select class" },
-						["ic"] = { query = "@class.inner", desc = "Select inner class" },
-
-						["al"] = { query = "@loop.outer", desc = "Select loop" },
-						["il"] = { query = "@loop.inner", desc = "Select inner loop" },
-
-						["ai"] = { query = "@conditional.outer", desc = "Select conditional" },
-						["ii"] = { query = "@conditional.inner", desc = "Select inner conditional" },
-					},
-				},
+		require("nvim-treesitter-textobjects").setup({
+			select = {
+				lookahead = true,
 			},
 		})
+
+		local select_textobject = require("nvim-treesitter-textobjects.select").select_textobject
+
+		local function map(keys, query)
+			vim.keymap.set({ "x", "o" }, keys, function()
+				select_textobject(query, "textobjects")
+			end)
+		end
+
+		map("af", "@function.outer")
+		map("if", "@function.inner")
+
+		map("ac", "@class.outer")
+		map("ic", "@class.inner")
+
+		map("al", "@loop.outer")
+		map("il", "@loop.inner")
+
+		map("ai", "@conditional.outer")
+		map("ii", "@conditional.inner")
 	end,
 }
