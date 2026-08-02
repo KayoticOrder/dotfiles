@@ -12,12 +12,18 @@ API key resolution order:
   1. JIMAKU_API_KEY environment variable
   2. ~/.config/jimaku/api_key file
   3. Interactive prompt (only in interactive mode)
+
+Interactive downloads default to a temp dir (/tmp/jimaku-subs) rather than
+the current directory, since /tmp is tmpfs (cleared on reboot) and also
+auto-purged by systemd-tmpfiles after 10 days -- so files don't pile up.
+Override with --output-dir to save somewhere permanent.
 """
 
 import argparse
 import json
 import os
 import sys
+import tempfile
 from getpass import getpass
 from pathlib import Path
 
@@ -25,6 +31,7 @@ import requests
 
 BASE_URL = "https://jimaku.cc/api"
 KEY_FILE = Path.home() / ".config" / "jimaku" / "api_key"
+DEFAULT_DOWNLOAD_DIR = Path(tempfile.gettempdir()) / "jimaku-subs"
 
 
 def get_api_key(interactive: bool) -> str:
@@ -135,9 +142,11 @@ def run_interactive_mode(args, headers: dict):
         print(f"Downloading {target['name']} ...")
         r = requests.get(target["url"])
         r.raise_for_status()
-        with open(target["name"], "wb") as fh:
-            fh.write(r.content)
-        print(f"Saved to ./{target['name']}")
+        out_dir = args.output_dir or DEFAULT_DOWNLOAD_DIR
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / target["name"]
+        out_path.write_bytes(r.content)
+        print(f"Saved to {out_path}")
 
 
 def main():
@@ -146,6 +155,12 @@ def main():
     parser.add_argument("--episode", "-e", type=int, help="Filter files by episode number")
     parser.add_argument("--entry-id", type=int, help="Skip search, list files for this entry ID directly")
     parser.add_argument("--json", action="store_true", help="Non-interactive: print JSON and exit")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help=f"Directory to save downloads to (interactive mode only). Default: {DEFAULT_DOWNLOAD_DIR}",
+    )
     args = parser.parse_args()
 
     headers = {"Authorization": get_api_key(interactive=not args.json)}

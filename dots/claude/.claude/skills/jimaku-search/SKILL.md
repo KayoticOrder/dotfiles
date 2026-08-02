@@ -56,12 +56,15 @@ Key is obtained at https://jimaku.cc/account (requires a Jimaku account).
    human-readable size) and ask which one.
 
 5. Download by fetching the file's `url` directly (no auth header needed,
-   these are public CDN links):
+   these are public CDN links) into `/tmp/jimaku-subs/`:
    ```
-   curl -sL -o "<file name>" "<url>"
+   mkdir -p /tmp/jimaku-subs && curl -sL -o "/tmp/jimaku-subs/<file name>" "<url>"
    ```
-   Save into the user's current directory unless they specify otherwise.
-   Report the saved path when done.
+   `/tmp` is tmpfs on this machine (cleared on reboot) and also auto-purged
+   by systemd-tmpfiles after 10 days, so files here don't accumulate --
+   don't download to the home directory or cwd by default. Report the saved
+   path when done. Only save somewhere permanent (e.g. the user's cwd or a
+   path they name) if the user explicitly asks to keep the file.
 
 ## Notes
 
