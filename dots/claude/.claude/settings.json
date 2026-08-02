@@ -3,5 +3,17 @@
     "pyright-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true
   },
-  "theme": "dark"
+  "theme": "dark",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.cwd // empty' | { read -r d; notify-send -a \"Claude Code\" \"Claude Code\" \"Finished working${d:+ in $(basename \"$d\")}\"; } 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
 }
