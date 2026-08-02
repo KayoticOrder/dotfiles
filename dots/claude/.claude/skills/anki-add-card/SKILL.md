@@ -35,4 +35,4 @@ Options:
 
 - Duplicate detection is per-model in Anki: adding the same word+sentence pair twice will be rejected with a clear "duplicate" error, not silently double-added.
 - Pronunciation audio comes from the same JapanesePod101 dictionary-audio source AJT Japanese/Yomichan use; some words (esp. slang/katakana) won't have a clip — that's expected, not a bug.
-- For bulk word extraction from a whole episode/book/podcast (most-common-words-not-yet-known, from subtitles or a jpdb.io vocabulary list), use `~/anki-vocab-builder/anki_vocab.py` instead — this skill is for one-off single-word adds.
+- For bulk word extraction from a whole episode/book/podcast (most-common-words-not-yet-known, from subtitles or a jpdb.io vocabulary list): if it's a specific anime episode and subs need to be sourced, use the `jimaku-to-anki` skill; otherwise drive `~/anki-vocab-builder/anki_vocab.py` directly. This skill is for one-off single-word adds.
