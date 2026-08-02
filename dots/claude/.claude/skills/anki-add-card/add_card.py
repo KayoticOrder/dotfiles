@@ -4,7 +4,7 @@ Add a single Japanese vocab card to Anki via AnkiConnect, matching the
 `Lapis` note-type field layout used in the user's real decks.
 
 Usage:
-    python3 add_card.py --word 適当 [--deck "studyy::MigakuNew"] \
+    python3 add_card.py --word 適当 [--deck "studyy::Claude"] \
         [--reading てきとう] [--sentence "適当にやった。"] \
         [--translation "I did it half-heartedly."] [--dry-run]
 
@@ -27,7 +27,7 @@ NEW_CARD_MODEL = "Lapis"
 JISHO_API = "https://jisho.org/api/v1/search/words?keyword="
 AUDIO_API = "https://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji={}&kana={}"
 AUDIO_PLACEHOLDER_MD5 = "7e2c2f954ef6051373ba916f000168dc"
-DEFAULT_DECK = "studyy::MigakuNew"
+DEFAULT_DECK = "studyy::Claude"  # shared deck for all Claude-created cards; see ~/anki-vocab-builder/anki_vocab.py's CLAUDE_DECK
 
 
 def anki_request(action, **params):

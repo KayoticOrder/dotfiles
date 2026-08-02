@@ -2,7 +2,8 @@
 """
 Generate Anki vocab cards from a piece of Japanese media (subtitles + optionally
 a jpdb.io vocabulary-list URL for that media), skipping words already present in
-your existing decks, with n+1 example sentences and word-pronunciation audio.
+your existing decks (or marked known/ignored/tracked in a Migaku core DB export --
+see MIGAKU_DB_GLOB), with n+1 example sentences and word-pronunciation audio.
 
 Two-step workflow (so sentence translations can be filled in by an LLM in between):
 
@@ -14,31 +15,50 @@ Two-step workflow (so sentence translations can be filled in by an LLM in betwee
       each "sentence")
 
   3) add: build & push cards to Anki, using the plan (+ translations if present).
-       python3 anki_vocab.py add --plan plan.json --deck-name "Show S1E1" [--dry-run]
+     Defaults to the shared CLAUDE_DECK; pass --source-tag to keep the source
+     (e.g. show/episode) identifiable via a tag instead of a separate deck.
+       python3 anki_vocab.py add --plan plan.json --source-tag "Show S1E1" [--dry-run]
 
 Requires Anki running with AnkiConnect, and network access for jisho.org /
 jpdb.io / the pronunciation-audio endpoint.
 """
 import argparse
 import base64
+import glob
 import hashlib
 import html
 import json
+import os
 import re
+import sqlite3
 import sys
 import time
 import urllib.parse
 import urllib.request
 from collections import Counter
+from datetime import datetime, timezone
 
 ANKI_CONNECT_URL = "http://localhost:8765"
-KNOWN_DECKS = ["studyy::Core 2000 rand", "studyy::MigakuNew"]
+CLAUDE_DECK = "studyy::Claude"  # where all Claude-created cards land, from any skill
+KNOWN_DECKS = ["studyy::Core 2000 rand", "studyy::MigakuNew", CLAUDE_DECK]
 NEW_CARD_MODEL = "Lapis"
 ALLOWED_POS = {"名詞", "動詞", "形容詞", "形状詞", "副詞"}
 JISHO_API = "https://jisho.org/api/v1/search/words?keyword="
 AUDIO_API = "https://assets.languagepod101.com/dictionary/japanese/audiomp3.php?kanji={}&kana={}"
 # MD5 of the fixed "word not in database" placeholder clip languagepod101 returns for unknown words
 AUDIO_PLACEHOLDER_MD5 = "7e2c2f954ef6051373ba916f000168dc"
+
+# The official Migaku browser extension stores its local SRS data as gzip'd
+# SQLite blobs in the "srs" IndexedDB database on the study.migaku.com origin
+# (object store "data", one row per synced DB file). This is pulled and
+# decompressed via a JS snippet run against that page (see jimaku-to-anki
+# skill notes), which is how WordList.tracked ends up available here -- it's
+# not exposed through Migaku's own UI as an exportable field. The glob picks
+# up whatever was last downloaded -- Chrome appends " (1)", " (2)", etc. on
+# repeat downloads.
+MIGAKU_DB_GLOB = os.path.expanduser("~/Downloads/migaku_core_export*.sqlite")
+MIGAKU_EXCLUDE_STATUSES = {"KNOWN", "IGNORED"}
+MIGAKU_STALE_DAYS = 3
 
 
 # ---------------------------------------------------------------- AnkiConnect
@@ -75,6 +95,32 @@ def get_known_words(decks):
                     known.add(strip_furigana_brackets(fields[key]["value"]))
         print(f"  {deck}: {len(infos)} notes")
     return known
+
+
+def find_latest_migaku_export():
+    matches = glob.glob(MIGAKU_DB_GLOB)
+    return max(matches, key=os.path.getmtime) if matches else None
+
+
+def load_migaku_known(path):
+    """Returns (words, exported_at) from a raw Migaku core SQLite DB export.
+    words is the set to exclude from new-card candidates: anything KNOWN,
+    IGNORED, or flagged tracked=1 (the user's personal marker for "I already
+    made an Anki card for this"). Plain UNKNOWN/LEARNING words are left as
+    candidates -- those are exactly what the user still wants to learn.
+    exported_at is the file's mtime (the DB itself has no export timestamp)."""
+    con = sqlite3.connect(path)
+    try:
+        cur = con.execute("SELECT dictForm, knownStatus, tracked FROM WordList WHERE del = 0")
+        words = {
+            dict_form
+            for dict_form, known_status, tracked in cur.fetchall()
+            if known_status in MIGAKU_EXCLUDE_STATUSES or tracked
+        }
+    finally:
+        con.close()
+    exported_at = datetime.fromtimestamp(os.path.getmtime(path), tz=timezone.utc).isoformat()
+    return words, exported_at
 
 
 # ---------------------------------------------------------------- media text loading
@@ -121,6 +167,12 @@ SENTENCE_SPLIT = re.compile(r"[。！？\n]")
 KATAKANA_ONLY = re.compile(r"^[ァ-ヶーヽヾ]+$")
 
 
+def katakana_to_hiragana(text):
+    """SudachiPy's reading_form() returns katakana by convention; the rest of
+    this pipeline (jisho lookups, existing cards) uses hiragana, so normalize."""
+    return "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in text)
+
+
 def tokenize_and_count(text):
     """Returns:
     counts: Counter of lemma -> frequency across the whole media
@@ -164,7 +216,10 @@ def tokenize_and_count(text):
                 continue
             counts[lemma] += 1
             lemma_surface.setdefault(lemma, surface)
-            lemma_reading.setdefault(lemma, m.reading_form())
+            reading = m.reading_form()
+            if not KATAKANA_ONLY.match(lemma):
+                reading = katakana_to_hiragana(reading)
+            lemma_reading.setdefault(lemma, reading)
             words_in_sentence.append((lemma, surface))
         if words_in_sentence:
             sentence_words.append((sent, words_in_sentence))
@@ -173,14 +228,21 @@ def tokenize_and_count(text):
 
 
 MIN_SENTENCE_LEN = 6  # avoid picking degenerate "sentences" that are just the word itself
+MIN_OTHER_CONTENT_WORDS = 1  # require real supporting context, not just the target word alone
+# Subtitle "sentences" are split on line breaks as well as 。！？, so a lot of
+# candidates are actually mid-clause fragments cut off where the subtitle cue
+# happened to end (e.g. "...には", "...なら"). These endings are a strong tell
+# that the clause continues past this fragment rather than standing alone.
+INCOMPLETE_ENDINGS = ("には", "なら", "ので", "たら", "けれども", "けれど", "けど", "って", "ながら", "し")
 
 
 def pick_n_plus_1_sentence(target_lemma, sentence_words, known):
     """Find a sentence containing target_lemma where every OTHER content word
     is already known. Falls back to the candidate with fewest unknown extra
-    words if no clean n+1 sentence exists. Prefers sentences with enough
-    surrounding context over bare single-word lines when both are available.
-    Returns (sentence, surface, is_clean)."""
+    words if no clean n+1 sentence exists. Prefers sentences with real
+    supporting context that don't look grammatically cut off mid-clause,
+    falling back tier by tier if nothing qualifies. Returns (sentence,
+    surface, is_clean)."""
     candidates = []
     for sent, words in sentence_words:
         target_surfaces = [surf for lem, surf in words if lem == target_lemma]
@@ -188,14 +250,18 @@ def pick_n_plus_1_sentence(target_lemma, sentence_words, known):
             continue
         other_lemmas = [lem for lem, surf in words if lem != target_lemma]
         unknown = [lem for lem in other_lemmas if lem not in known]
-        candidates.append((len(unknown), len(sent), sent, target_surfaces[0]))
+        cut_off = sent.endswith(INCOMPLETE_ENDINGS)
+        candidates.append((len(unknown), len(other_lemmas), len(sent), sent, target_surfaces[0], cut_off))
 
     if not candidates:
         return None, None, False
 
-    candidates.sort(key=lambda c: (c[0], c[1]))
-    with_context = [c for c in candidates if c[1] >= MIN_SENTENCE_LEN]
-    unknown_count, _, sent, surface = (with_context or candidates)[0]
+    # Fewest unknown words first (the n+1 constraint), then richer context, then shorter.
+    candidates.sort(key=lambda c: (c[0], -c[1], c[2]))
+    substantial = [c for c in candidates if c[1] >= MIN_OTHER_CONTENT_WORDS and not c[5]]
+    with_context = [c for c in candidates if c[1] >= MIN_OTHER_CONTENT_WORDS]
+    with_length = [c for c in candidates if c[2] >= MIN_SENTENCE_LEN]
+    unknown_count, _, _, sent, surface, _ = (substantial or with_context or with_length or candidates)[0]
     return sent, surface, unknown_count == 0
 
 
@@ -302,6 +368,25 @@ def cmd_plan(args):
 
     print("Loading known vocabulary...")
     known = get_known_words(args.known_decks)
+    print(f"  from Anki decks: {len(known)}")
+
+    if not args.no_migaku:
+        migaku_path = args.migaku_export or find_latest_migaku_export()
+        if migaku_path:
+            migaku_known, exported_at = load_migaku_known(migaku_path)
+            age_note = ""
+            if exported_at:
+                try:
+                    exported_dt = datetime.fromisoformat(exported_at.replace("Z", "+00:00"))
+                    age_days = (datetime.now(timezone.utc) - exported_dt).days
+                    if age_days >= MIGAKU_STALE_DAYS:
+                        age_note = f"  [!stale - exported {age_days}d ago, consider re-exporting from study.migaku.com/word-browser]"
+                except ValueError:
+                    pass
+            print(f"  from Migaku export ({os.path.basename(migaku_path)}, exported {exported_at}): {len(migaku_known)}{age_note}")
+            known |= migaku_known
+        else:
+            print(f"  no Migaku DB export found ({MIGAKU_DB_GLOB}) -- skipping. Pass --migaku-export or pull a fresh one from study.migaku.com first.")
     print(f"  total known words: {len(known)}")
 
     print(f"Loading and tokenizing media: {args.input}")
@@ -340,14 +425,15 @@ def cmd_plan(args):
         if sentence is None:
             sentence, surface = "", lemma_surface.get(lemma, lemma)
 
-        if jpdb_meanings:
-            reading = lemma_reading.get(lemma, "")
-            definitions = jpdb_meanings[:3]
-        else:
-            info = jisho_lookup(lemma)
-            time.sleep(0.3)
-            reading = (info["reading"] if info else "") or lemma_reading.get(lemma, "")
-            definitions = info["definitions"] if info else []
+        # Always prefer jisho for the reading: sudachi's reading_form() reflects
+        # the inflected surface the word happened to appear as in the sentence
+        # (e.g. "済ん" from "済んだ"), not the dictionary form -- only fall back
+        # to it when jisho has no entry. jpdb's own meanings are still used when
+        # available since they're more tailored to this specific show/media.
+        info = jisho_lookup(lemma)
+        time.sleep(0.3)
+        reading = (info["reading"] if info else "") or lemma_reading.get(lemma, "")
+        definitions = jpdb_meanings[:3] if jpdb_meanings else (info["definitions"] if info else [])
 
         possible_name = bool(KATAKANA_ONLY.match(lemma))
 
@@ -414,6 +500,8 @@ def cmd_add(args):
                 audio_tag = f"[sound:{filename}]"
 
         tags = ["auto-vocab-builder"]
+        if args.source_tag:
+            tags.append(re.sub(r"\s+", "-", args.source_tag.strip()))
         if not entry.get("is_clean_n1", True):
             tags.append("needs-review-sentence")
         if not translation:
@@ -479,12 +567,15 @@ def main():
     p_plan.add_argument("--jpdb-url", help="Optional jpdb.io vocabulary-list URL for this media, for word ranking")
     p_plan.add_argument("--top", type=int, default=25, help="How many new words to plan cards for")
     p_plan.add_argument("--known-decks", nargs="*", default=KNOWN_DECKS, help="Decks to treat as already-known vocab")
+    p_plan.add_argument("--migaku-export", help=f"Path to a raw Migaku core SQLite DB export (default: newest match of {MIGAKU_DB_GLOB})")
+    p_plan.add_argument("--no-migaku", action="store_true", help="Don't factor in the Migaku known/ignored/tracked word export")
     p_plan.add_argument("--out", required=True, help="Path to write the plan JSON file")
     p_plan.set_defaults(func=cmd_plan)
 
     p_add = sub.add_parser("add", help="Build cards from a (translated) plan file and push to Anki")
     p_add.add_argument("--plan", required=True, help="Path to plan JSON file (from `plan`, translations filled in)")
-    p_add.add_argument("--deck-name", required=True, help="Name for the new Anki deck of generated cards")
+    p_add.add_argument("--deck-name", default=CLAUDE_DECK, help=f"Target deck (default: {CLAUDE_DECK}, shared by all Claude-generated cards)")
+    p_add.add_argument("--source-tag", help="Optional tag identifying where these cards came from, e.g. a show/episode name (spaces become hyphens)")
     p_add.add_argument("--dry-run", action="store_true", help="Preview cards without writing to Anki")
     p_add.set_defaults(func=cmd_add)
 

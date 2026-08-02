@@ -5,7 +5,7 @@ description: Add a single Japanese vocabulary card to the user's Anki collection
 
 # Add a card to Anki
 
-Adds one vocab card to the user's Anki collection, in the same field format as their real deck (`Lapis` note type, used in `studyy::MigakuNew`).
+Adds one vocab card to the user's Anki collection, in the same field format as their real deck (`Lapis` note type), into `studyy::Claude` — the shared deck for all Claude-created cards, from this skill or `jimaku-to-anki`.
 
 ## How to use
 
@@ -17,7 +17,7 @@ python3 ~/.claude/skills/anki-add-card/add_card.py --word 適当 [options]
 
 Options:
 - `--word` (required): dictionary form of the word, e.g. `適当`, `食べる`
-- `--deck`: target deck, default `studyy::MigakuNew`
+- `--deck`: target deck, default `studyy::Claude`
 - `--reading`: kana reading; auto-looked-up via jisho.org if omitted
 - `--sentence`: example sentence containing the word (the word gets auto-bolded)
 - `--translation`: English translation of the sentence — stored in the card's "Misc info" field
