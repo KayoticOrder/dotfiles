@@ -62,6 +62,18 @@ return {
 			})
 		end
 
+		local function grep_word_under_cursor()
+			ts.extensions.live_grep_args.live_grep_args({ default_text = vim.fn.expand("<cword>") })
+		end
+
+		local function grep_visual_selection()
+			local saved_reg = vim.fn.getreg("v")
+			vim.cmd([[noautocmd sil norm! "vy]])
+			local selection = vim.fn.getreg("v")
+			vim.fn.setreg("v", saved_reg)
+			ts.extensions.live_grep_args.live_grep_args({ default_text = selection })
+		end
+
 		local function harpoon_picker()
 			local harpoon = require("harpoon")
 			local conf = require("telescope.config").values
@@ -92,6 +104,8 @@ return {
 			{ "<leader>fm", tb.keymaps, desc = "Keymaps" },
 			{ "<leader>fs", tb.lsp_document_symbols, desc = "Symbols" },
 			{ "<leader>fS", tb.lsp_dynamic_workspace_symbols, desc = "Workspace Symbols" },
+			{ "<leader>fw", grep_word_under_cursor, desc = "Grep Word (editable)" },
+			{ "<leader>fw", grep_visual_selection, mode = "v", desc = "Grep Selection (editable)" },
 			{ "<leader>fu", ts.extensions.undo.undo, desc = "Undo History" },
 			{ "gd", tb.lsp_definitions, desc = "Definition" },
 			{ "gD", tb.lsp_implementations, desc = "Implementation" },
