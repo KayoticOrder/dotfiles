@@ -4,6 +4,7 @@ return {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-frecency.nvim",
 		"debugloop/telescope-undo.nvim",
+		"nvim-telescope/telescope-live-grep-args.nvim",
 		{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
 	},
 	cmd = "Telescope",
@@ -82,7 +83,7 @@ return {
 		return {
 			{ "<leader>fz", tb.find_files, desc = "Fuzzy Files" },
 			{ "<leader>ff", "<cmd>Telescope frecency workspace=CWD<cr>", desc = "Files" },
-			{ "<leader>fg", tb.live_grep, desc = "Grep" },
+			{ "<leader>fg", ts.extensions.live_grep_args.live_grep_args, desc = "Grep (args)" },
 			{ "<leader>fb", tb.buffers, desc = "Buffers" },
 			{ "<leader>fc", command_picker, desc = "Commands" },
 			{ "<leader>f:", tb.command_history, desc = "Command History" },
@@ -244,5 +245,6 @@ return {
 		ts.load_extension("fzf")
 		ts.load_extension("undo")
 		ts.load_extension("frecency")
+		ts.load_extension("live_grep_args")
 	end,
 }
