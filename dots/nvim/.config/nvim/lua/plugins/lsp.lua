@@ -5,6 +5,8 @@ return {
 		keys = {
 			{ "<leader>ci", ":Lspsaga hover_doc<CR>", desc = "Hover Info" },
 			{ "<leader>cr", ":Lspsaga rename<CR>", desc = "Rename Symbol" },
+			{ "<leader>ck", ":Lspsaga incoming_calls<CR>", desc = "Incoming Calls" },
+			{ "<leader>co", ":Lspsaga outgoing_calls<CR>", desc = "Outgoing Calls" },
 		},
 		opts = {
 			ui = {
