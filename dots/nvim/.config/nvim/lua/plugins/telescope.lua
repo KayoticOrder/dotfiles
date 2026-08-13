@@ -91,6 +91,7 @@ return {
 			{ "<leader>f?", tb.help_tags, desc = "Help Tags" },
 			{ "<leader>fm", tb.keymaps, desc = "Keymaps" },
 			{ "<leader>fs", tb.lsp_document_symbols, desc = "Symbols" },
+			{ "<leader>fS", tb.lsp_dynamic_workspace_symbols, desc = "Workspace Symbols" },
 			{ "<leader>fu", ts.extensions.undo.undo, desc = "Undo History" },
 			{ "gd", tb.lsp_definitions, desc = "Definition" },
 			{ "gD", tb.lsp_implementations, desc = "Implementation" },
