@@ -45,6 +45,9 @@ return {
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
+		-- replaced by snacks.indent (see plugins/snacks.lua), which was
+		-- double-drawing guides alongside this
+		enabled = false,
 		main = "ibl",
 		opts = {},
 	},
