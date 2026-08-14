@@ -1,5 +1,8 @@
 return {
 	"stevearc/oil.nvim",
+	-- replaced by snacks explorer (<leader>fe / <leader>ee), which is now the netrw
+	-- replacement too, see plugins/snacks.lua
+	enabled = false,
 	---@module 'oil'
 	---@type oil.SetupOpts
 	keys = {

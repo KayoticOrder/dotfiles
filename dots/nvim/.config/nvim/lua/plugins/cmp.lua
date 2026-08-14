@@ -1,12 +1,15 @@
+-- replaced by blink.cmp + blink-cmp-copilot, see plugins/blink.lua
 return {
 	{
 		"zbirenbaum/copilot-cmp",
+		enabled = false,
 		config = function()
 			require("copilot_cmp").setup()
 		end,
 	},
 	{
 		"hrsh7th/nvim-cmp",
+		enabled = false,
 		lazy = false,
 		version = false, -- last release is way too old
 		event = "InsertEnter",

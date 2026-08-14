@@ -1,5 +1,7 @@
 return {
 	"nvim-telescope/telescope.nvim",
+	-- fully replaced by snacks.picker, see plugins/snacks.lua
+	enabled = false,
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-frecency.nvim",
@@ -93,8 +95,7 @@ return {
 		end
 
 		return {
-			{ "<leader>fz", tb.find_files, desc = "Fuzzy Files" },
-			{ "<leader>ff", "<cmd>Telescope frecency workspace=CWD<cr>", desc = "Files" },
+			-- <leader>fz / <leader>ff: prototyping snacks.picker as a replacement, see plugins/snacks.lua
 			{ "<leader>fg", ts.extensions.live_grep_args.live_grep_args, desc = "Grep (args)" },
 			{ "<leader>fb", tb.buffers, desc = "Buffers" },
 			{ "<leader>fc", command_picker, desc = "Commands" },

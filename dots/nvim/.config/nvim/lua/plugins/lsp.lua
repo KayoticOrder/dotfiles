@@ -58,6 +58,12 @@ return {
 		config = function()
 			require("mason-lspconfig").setup()
 
+			-- advertise blink.cmp's extra completion capabilities (snippets, etc.)
+			-- to every LSP server
+			vim.lsp.config("*", {
+				capabilities = require("blink.cmp").get_lsp_capabilities(),
+			})
+
 			vim.lsp.config("lua_ls", {
 				on_init = function(client)
 					if client.workspace_folders then
