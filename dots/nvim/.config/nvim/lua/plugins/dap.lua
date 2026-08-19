@@ -9,7 +9,7 @@ return {
 				"jay-babu/mason-nvim-dap.nvim",
 				dependencies = "williamboman/mason.nvim",
 				opts = {
-					ensure_installed = {},
+					ensure_installed = { "codelldb" },
 					automatic_installation = true,
 					handlers = {},
 				},
@@ -108,6 +108,30 @@ return {
 			vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticWarn" })
 			vim.fn.sign_define("DapStopped", { text = "▶", texthl = "DiagnosticInfo", linehl = "DapStoppedLine" })
 			vim.fn.sign_define("DapLogPoint", { text = "◆", texthl = "DiagnosticInfo" })
+
+			dap.configurations.cpp = {
+				{
+					name = "Launch",
+					type = "codelldb",
+					request = "launch",
+					program = function()
+						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+					end,
+					cwd = "${workspaceFolder}",
+					stopOnEntry = false,
+					args = function()
+						return vim.split(vim.fn.input("Program args: "), " ", { trimempty = true })
+					end,
+				},
+				{
+					name = "Attach to process",
+					type = "codelldb",
+					request = "attach",
+					pid = require("dap.utils").pick_process,
+					cwd = "${workspaceFolder}",
+				},
+			}
+			dap.configurations.c = dap.configurations.cpp
 		end,
 	},
 }
