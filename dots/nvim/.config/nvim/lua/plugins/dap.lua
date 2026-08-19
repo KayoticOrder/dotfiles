@@ -9,7 +9,7 @@ return {
 				"jay-babu/mason-nvim-dap.nvim",
 				dependencies = "williamboman/mason.nvim",
 				opts = {
-					ensure_installed = { "codelldb" },
+					ensure_installed = {},
 					automatic_installation = true,
 					handlers = {},
 				},
@@ -91,6 +91,37 @@ return {
 			local dap = require("dap")
 			local dapui = require("dapui")
 
+			-- lldb-dap ships with the system LLVM/LLDB install (not via Mason), and
+			-- distros disagree on the binary name: Arch ships it unversioned as
+			-- `lldb-dap`, while Ubuntu versions it (e.g. `lldb-dap-18`). Resolve
+			-- whichever is actually on PATH, falling back to the legacy
+			-- `lldb-vscode` name used by older LLVM releases.
+			local function find_lldb_dap()
+				if vim.fn.executable("lldb-dap") == 1 then
+					return "lldb-dap"
+				end
+
+				for _, dir in ipairs(vim.split(vim.env.PATH or "", ":")) do
+					local matches = vim.fn.glob(dir .. "/lldb-dap-*", false, true)
+					if #matches > 0 then
+						table.sort(matches)
+						return matches[#matches]
+					end
+				end
+
+				if vim.fn.executable("lldb-vscode") == 1 then
+					return "lldb-vscode"
+				end
+
+				return "lldb-dap"
+			end
+
+			dap.adapters.lldb = {
+				type = "executable",
+				command = find_lldb_dap(),
+				name = "lldb",
+			}
+
 			dapui.setup()
 			require("nvim-dap-virtual-text").setup()
 
@@ -112,7 +143,7 @@ return {
 			dap.configurations.cpp = {
 				{
 					name = "Launch",
-					type = "codelldb",
+					type = "lldb",
 					request = "launch",
 					program = function()
 						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
@@ -125,7 +156,7 @@ return {
 				},
 				{
 					name = "Attach to process",
-					type = "codelldb",
+					type = "lldb",
 					request = "attach",
 					pid = require("dap.utils").pick_process,
 					cwd = "${workspaceFolder}",

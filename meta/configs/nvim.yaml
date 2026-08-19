@@ -1,5 +1,5 @@
 - omnipkg:
-  - install: [ neovim, ripgrep ]
+  - install: [ neovim, ripgrep, lldb ]
 
 - link:
     ~/.config/nvim: dots/nvim/.config/nvim
