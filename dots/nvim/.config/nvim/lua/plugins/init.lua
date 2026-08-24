@@ -33,11 +33,21 @@ return {
 	},
 	{
 		"danymat/neogen",
-		config = true,
 		-- Uncomment next line if you want to follow only stable versions
 		-- version = "*"
-		init = function()
-			require("neogen").setup({ snippet_engine = "luasnip" })
-		end,
+		keys = {
+			{
+				"<leader>cD",
+				function()
+					require("neogen").generate()
+				end,
+				desc = "Generate Doc Annotation",
+			},
+		},
+		opts = {
+			-- use Neovim's native snippet engine (vim.snippet), matching
+			-- blink.cmp's snippet expansion instead of pulling in luasnip
+			snippet_engine = "nvim",
+		},
 	},
 }
