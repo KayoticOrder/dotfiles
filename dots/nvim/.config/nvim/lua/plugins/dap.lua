@@ -59,6 +59,20 @@ return {
 				desc = "Step Out",
 			},
 			{
+				"<leader>dk",
+				function()
+					require("dap").up()
+				end,
+				desc = "Up Stack Frame",
+			},
+			{
+				"<leader>dj",
+				function()
+					require("dap").down()
+				end,
+				desc = "Down Stack Frame",
+			},
+			{
 				"<leader>dr",
 				function()
 					require("dap").repl.toggle()
