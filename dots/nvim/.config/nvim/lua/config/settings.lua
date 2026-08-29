@@ -2,6 +2,10 @@ local opt = vim.opt
 
 vim.cmd("colorscheme kanagawa-wave")
 
+-- dap.lua's DapStopped sign uses this linehl; must be set after the
+-- colorscheme so `hi clear` on load doesn't wipe it
+vim.api.nvim_set_hl(0, "DapStoppedLine", { link = "Visual" })
+
 opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
 opt.expandtab = true -- Use spaces instead of tabs
 opt.shiftwidth = 2 -- Number of spaces for each indentation level
@@ -40,6 +44,7 @@ opt.textwidth = 80
 
 vim.o.termguicolors = true
 vim.o.signcolumn = "yes"
+vim.o.winborder = "single" -- default border for floats that don't set their own
 vim.diagnostic.config({
 	signs = true,
 	virtual_text = false,

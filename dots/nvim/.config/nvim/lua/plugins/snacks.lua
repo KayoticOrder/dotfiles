@@ -47,7 +47,6 @@ return {
 		explorer = { replace_netrw = true },
 		picker = {
 			ui_select = true,
-			layout = centered_layout,
 			formatters = {
 				file = { filename_first = true },
 			},
@@ -56,12 +55,37 @@ return {
 					keys = { ["o"] = "toggle_preview" },
 				},
 			},
-			sources = {
-				-- explorer defaults to jump.close = false since it's normally a
-				-- persistent sidebar; now that it's a centered modal, close it
-				-- like every other picker when a file is opened
-				explorer = { layout = centered_layout, jump = { close = true } },
-			},
+			-- applied per-source (not as a global `layout`) so sources not
+			-- listed here, e.g. "select", can still resolve their own preset
+			sources = (function()
+				local sources = {
+					-- explorer defaults to jump.close = false since it's normally a
+					-- persistent sidebar; now that it's a centered modal, close it
+					-- like every other picker when a file is opened
+					explorer = { layout = centered_layout, jump = { close = true } },
+				}
+				for _, name in ipairs({
+					"smart",
+					"files",
+					"grep",
+					"grep_word",
+					"buffers",
+					"commands",
+					"command_history",
+					"harpoon",
+					"help",
+					"keymaps",
+					"lsp_symbols",
+					"lsp_workspace_symbols",
+					"lsp_definitions",
+					"lsp_implementations",
+					"lsp_references",
+					"undo",
+				}) do
+					sources[name] = { layout = centered_layout }
+				end
+				return sources
+			end)(),
 		},
 	},
 	keys = function()
