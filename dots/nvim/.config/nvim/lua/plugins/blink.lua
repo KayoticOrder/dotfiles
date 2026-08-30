@@ -11,24 +11,13 @@ return {
 	opts = {
 		-- C-j/C-k move the selection (j down/next, k up/prev), C-l/C-f accept
 		-- (select_and_accept auto-selects the first item if none is selected
-		-- yet, matching the old confirm({select=true})); C-space manually
-		-- opens the menu when it's not already showing (e.g. after dismissing
-		-- it, or completion.trigger didn't fire) - matches VS Code's default
+		-- yet, matching the old confirm({select=true}))
 		keymap = {
 			preset = "default",
 			["<C-j>"] = { "select_next", "fallback" },
 			["<C-k>"] = { "select_prev", "fallback" },
 			["<C-l>"] = { "select_and_accept", "fallback" },
 			["<C-f>"] = { "select_and_accept", "fallback" },
-			["<C-space>"] = { "show", "fallback" },
-			-- copilot is async and sometimes hasn't returned by the time other
-			-- providers populate the menu, so it silently never shows; this
-			-- forces a fresh request and filters the menu to copilot only
-			["<M-\\>"] = {
-				function(cmp)
-					return cmp.show({ providers = { "copilot" } })
-				end,
-			},
 		},
 		appearance = {
 			nerd_font_variant = "mono",

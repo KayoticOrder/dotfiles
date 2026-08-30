@@ -57,20 +57,3 @@ vim.api.nvim_create_autocmd("BufEnter", {
 		vim.opt.formatoptions:remove({ "o" })
 	end,
 })
-
--- Canonicalize buffer names to their absolute path so a file opened via a
--- literal "./"-prefixed path (e.g. quickfix/grep results) resolves to the
--- same path as elsewhere, instead of showing up as a separate duplicate
--- entry in pickers that merge buffers with an on-disk file listing.
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-	callback = function(args)
-		local name = vim.api.nvim_buf_get_name(args.buf)
-		if name == "" or not vim.uv.fs_stat(name) then
-			return
-		end
-		local canonical = vim.fn.fnamemodify(name, ":p")
-		if name ~= canonical then
-			vim.api.nvim_buf_set_name(args.buf, canonical)
-		end
-	end,
-})
