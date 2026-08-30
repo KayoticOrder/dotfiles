@@ -84,6 +84,23 @@ return {
 				}) do
 					sources[name] = { layout = centered_layout }
 				end
+
+				-- smart's built-in "unique_file" transform dedupes buffers/recent/files
+				-- by comparing raw path strings with no normalization, so the same file
+				-- opened via a "./"-prefixed path (e.g. quickfix/grep) and via `fd`'s
+				-- listing show up as two entries; resolve both to an absolute path first
+				sources.smart.transform = function(item, ctx)
+					local path = require("snacks").picker.util.path(item)
+					if not path then
+						return false
+					end
+					path = vim.fn.fnamemodify(path, ":p")
+					if ctx.meta.done[path] then
+						return false
+					end
+					ctx.meta.done[path] = true
+				end
+
 				return sources
 			end)(),
 		},
