@@ -21,6 +21,14 @@ return {
 			["<C-l>"] = { "select_and_accept", "fallback" },
 			["<C-f>"] = { "select_and_accept", "fallback" },
 			["<C-space>"] = { "show", "fallback" },
+			-- copilot is async and sometimes hasn't returned by the time other
+			-- providers populate the menu, so it silently never shows; this
+			-- forces a fresh request and filters the menu to copilot only
+			["<M-\\>"] = {
+				function(cmp)
+					return cmp.show({ providers = { "copilot" } })
+				end,
+			},
 		},
 		appearance = {
 			nerd_font_variant = "mono",
