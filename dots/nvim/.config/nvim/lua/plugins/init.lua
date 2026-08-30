@@ -10,7 +10,20 @@ return {
 		cmd = "Copilot",
 		event = "InsertEnter",
 		opts = {
-			suggestion = { enabled = false },
+			-- ghost-text ready to request on demand, not shown as-you-type -
+			-- blink-cmp-copilot already surfaces suggestions in the completion
+			-- menu, so this covers full/multi-line suggestions on their own
+			-- keys instead of fighting blink.cmp's Tab/C-* bindings for them
+			suggestion = {
+				enabled = true,
+				auto_trigger = false,
+				keymap = {
+					next = "<M-\\>",
+					prev = "<M-[>",
+					accept = "<M-CR>",
+					dismiss = "<C-]>",
+				},
+			},
 			panel = { enabled = false },
 		},
 	},
