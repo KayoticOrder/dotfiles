@@ -57,3 +57,19 @@ vim.api.nvim_create_autocmd("BufEnter", {
 		vim.opt.formatoptions:remove({ "o" })
 	end,
 })
+
+-- vim.ui.open() (used by the built-in `gx`) tries xdg-open before wslview,
+-- and xdg-open doesn't have a working browser handler under WSL; force it
+-- to hand off to Windows instead
+if vim.fn.has("wsl") == 1 then
+	local wsl_open_cmd = (vim.fn.executable("wslview") == 1 and { "wslview" })
+		or (vim.fn.executable("explorer.exe") == 1 and { "explorer.exe" })
+	if wsl_open_cmd then
+		local ui_open = vim.ui.open
+		vim.ui.open = function(path, opts)
+			opts = opts or {}
+			opts.cmd = opts.cmd or wsl_open_cmd
+			return ui_open(path, opts)
+		end
+	end
+end
