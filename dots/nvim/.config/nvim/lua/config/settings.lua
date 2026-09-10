@@ -27,6 +27,7 @@ opt.pumheight = 12
 opt.number = true
 opt.relativenumber = true
 opt.cursorline = true
+opt.scrolloff = 8 -- Keep this many lines visible above/below the cursor when scrolling
 
 opt.undofile = true
 opt.undodir = vim.fn.expand("~/.vim/undo")
