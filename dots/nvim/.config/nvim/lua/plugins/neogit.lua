@@ -3,7 +3,7 @@ return {
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		-- already installed for <leader>gH; neogit uses it for commit diffs
-		"sindrets/diffview.nvim",
+		"dlyongemallo/diffview.nvim",
 		"nvim-tree/nvim-web-devicons",
 	},
 	cmd = "Neogit",
