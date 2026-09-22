@@ -14,3 +14,8 @@ vim.keymap.set("n", "<leader>cd", function()
 		focusable = false,
 	})
 end, { noremap = true, silent = true, desc = "Diagnostics" })
+
+-- Move by visual (wrapped) line instead of file line; a no-op when wrap is
+-- off, since gj/gk == j/k there. v:count check keeps counts (e.g. 5j) exact.
+vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
