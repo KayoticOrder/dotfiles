@@ -1,15 +1,17 @@
 -- obsidian.nvim only has daily notes built in; build weekly notes the same
 -- way it builds daily ones internally (see lua/obsidian/daily/init.lua and
--- lua/obsidian/commands/today.lua upstream) so it behaves identically -
--- create-if-missing, open-if-exists, same vault-relative note path.
+-- lua/obsidian/commands/today.lua upstream, at the v3.16.7 tag this config
+-- pins to - date formatting lives in obsidian.util there, not obsidian.date
+-- which only exists on the unreleased main branch) so it behaves
+-- identically - create-if-missing, open-if-exists, same vault-relative path.
 local function weekly_note_path()
 	local Path = require("obsidian.path")
 	local api = require("obsidian.api")
-	local date = require("obsidian.date")
+	local util = require("obsidian.util")
 
 	local dir = Path.new(api.resolve_workspace_dir()):resolve()
 	dir = Path.new(vim.fs.joinpath(tostring(dir), "weekly"))
-	local id = tostring(date.format(os.time(), "%G-W%V")) -- ISO week, e.g. 2026-W39
+	local id = tostring(util.format_date(os.time(), "%G-W%V")) -- ISO week, e.g. 2026-W39
 	local path = Path.new(vim.fs.joinpath(tostring(dir), id .. ".md"))
 	return path, id
 end
