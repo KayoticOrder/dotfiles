@@ -1,3 +1,36 @@
+-- obsidian.nvim only has daily notes built in; build weekly notes the same
+-- way it builds daily ones internally (see lua/obsidian/daily/init.lua and
+-- lua/obsidian/commands/today.lua upstream) so it behaves identically -
+-- create-if-missing, open-if-exists, same vault-relative note path.
+local function weekly_note_path()
+	local Path = require("obsidian.path")
+	local api = require("obsidian.api")
+	local date = require("obsidian.date")
+
+	local dir = Path.new(api.resolve_workspace_dir()):resolve()
+	dir = Path.new(vim.fs.joinpath(tostring(dir), "weekly"))
+	local id = tostring(date.format(os.time(), "%G-W%V")) -- ISO week, e.g. 2026-W39
+	local path = Path.new(vim.fs.joinpath(tostring(dir), id .. ".md"))
+	return path, id
+end
+
+local function open_weekly_note()
+	local Note = require("obsidian.note")
+	local path, id = weekly_note_path()
+
+	local note
+	if path:exists() then
+		note = Note.from_file(path)
+	else
+		note = Note.create({ id = id, verbatim = true, aliases = {}, tags = {}, dir = path:parent() })
+	end
+
+	if not note:exists() then
+		note:write()
+	end
+	note:open()
+end
+
 return {
 	"obsidian-nvim/obsidian.nvim",
 	version = "*", -- use latest release, remove to use latest commit
@@ -8,6 +41,7 @@ return {
 	keys = {
 		{ "<leader>on", "<cmd>Obsidian new<cr>", desc = "Obsidian: New note" },
 		{ "<leader>od", "<cmd>Obsidian today<cr>", desc = "Obsidian: Today's note" },
+		{ "<leader>oW", open_weekly_note, desc = "Obsidian: This week's note" },
 		{ "<leader>oo", "<cmd>Obsidian quick_switch<cr>", desc = "Obsidian: Quick switch" },
 		{ "<leader>og", "<cmd>Obsidian search<cr>", desc = "Obsidian: Grep notes" },
 		{ "<leader>ot", "<cmd>Obsidian new todo<cr>", desc = "Obsidian: Todo list" },
