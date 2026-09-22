@@ -59,6 +59,20 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	end,
 })
 
+-- textwidth=80 + the default 't' formatoption hard-wraps (inserts real
+-- newlines) as you type past column 80, which is wrong for prose; use soft
+-- wrap instead so long lines stay on one line in the file and just wrap
+-- visually, same as most markdown editors
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "markdown",
+	callback = function()
+		vim.opt_local.formatoptions:remove({ "t" })
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+		vim.opt_local.breakindent = true
+	end,
+})
+
 -- vim.ui.open() (used by the built-in `gx`) tries xdg-open before wslview,
 -- and xdg-open doesn't have a working browser handler under WSL; force it
 -- to hand off to Windows instead
