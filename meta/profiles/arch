@@ -1,6 +1,7 @@
 arch
 fonts
 tmux
+sesh
 kitty
 alacritty
 zsh

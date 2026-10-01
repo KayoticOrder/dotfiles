@@ -13,6 +13,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `kitty` | Kitty terminal |
 | `nvim` | Neovim (lazy.nvim config) |
 | `obsidian` | Obsidian vault settings, templates, glossary |
+| `sesh` | sesh tmux session manager (pinned release binary) + per-repo session layout config |
 | `tmux` | tmux + plugins (TPM) |
 | `zsh` | zsh, oh-my-zsh, Powerlevel10k |
 

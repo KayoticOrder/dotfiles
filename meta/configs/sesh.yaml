@@ -1,0 +1,51 @@
+# sesh isn't in apt and is AUR-only on Arch, so it's downloaded straight from
+# upstream (pinned + checksum-verified, same approach as fonts.yaml) to get an
+# identical binary on every distro. Bump version + both checksums by hand
+# (from the release's sesh_<version>_checksums.txt) to update.
+- omnipkg:
+  - install: [ tmux, zoxide ]
+
+- shell:
+  - command: |
+      version=2.31.0
+      dest="$HOME/.local/bin"
+
+      if [ "$(uname -s)" != "Linux" ]; then
+        echo "ERROR: sesh install only supports Linux, got $(uname -s)" >&2
+        exit 1
+      fi
+
+      if [ -x "$dest/sesh" ] && [ "$("$dest/sesh" --version 2>/dev/null)" = "sesh version $version" ]; then
+        exit 0
+      fi
+
+      case "$(uname -m)" in
+        x86_64|amd64)  arch=x86_64; sha=83c07290cc13c4f80a3a99ba4496134ba60553ad24fb9302f88c1ee922fe6a69 ;;
+        aarch64|arm64) arch=arm64;  sha=d83d00a6f0c3c961b6f248c89dcbb0916db6c054bde6be19001a3fd8acf88748 ;;
+        *)
+          echo "ERROR: sesh install doesn't support architecture $(uname -m)" >&2
+          exit 1
+          ;;
+      esac
+
+      tmp="$(mktemp -d)"
+      rc=0
+
+      if ! curl --retry 3 --retry-delay 2 -fLo "$tmp/sesh.tar.gz" "https://github.com/joshmedeski/sesh/releases/download/v${version}/sesh_Linux_${arch}.tar.gz"; then
+        echo "ERROR: failed to download sesh v${version}" >&2
+        rc=1
+      elif ! echo "${sha}  $tmp/sesh.tar.gz" | sha256sum -c - >/dev/null; then
+        echo "ERROR: sesh v${version} checksum mismatch" >&2
+        rc=1
+      else
+        mkdir -p "$dest"
+        tar -xzf "$tmp/sesh.tar.gz" -C "$tmp" sesh
+        install -m 755 "$tmp/sesh" "$dest/sesh"
+      fi
+
+      rm -rf "$tmp"
+      exit $rc
+    description: "Download pinned sesh release into ~/.local/bin"
+
+- link:
+    ~/.config/sesh: dots/sesh/.config/sesh

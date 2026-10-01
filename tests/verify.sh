@@ -89,6 +89,12 @@ verify_nvim() {
   check_bin nvim
 }
 
+verify_sesh() {
+  check_link "$HOME/.config/sesh" "dots/sesh/.config/sesh"
+  # Installed to ~/.local/bin, which isn't on PATH in the test containers.
+  PATH="$HOME/.local/bin:$PATH" check_bin sesh
+}
+
 verify_tmux() {
   check_link "$HOME/.config/tmux" "dots/tmux/.config/tmux"
   check_bin tmux
