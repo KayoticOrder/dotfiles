@@ -1,17 +1,4 @@
-# sesh only applies `windows` to [[session]]/[[wildcard]] entries, not to
-# [default_session], so the layout hangs off the wildcard (repos two levels
-# under $HOME, e.g. ~/code/foo); anything else just gets the AI window.
+# Sessions open as a plain shell. To auto-launch things, add startup_command
+# to [default_session] or windows to a [[wildcard]]/[[session]] (sesh ignores
+# `windows` on [default_session]) - see https://github.com/joshmedeski/sesh
 [default_session]
-startup_command = "claude"
-
-[[wildcard]]
-pattern = "~/*/*"
-startup_command = "claude"
-windows = ["nvim", "shell"]
-
-[[window]]
-name = "nvim"
-startup_script = "nvim"
-
-[[window]]
-name = "shell"
