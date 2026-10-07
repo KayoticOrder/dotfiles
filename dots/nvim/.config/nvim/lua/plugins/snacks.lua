@@ -66,6 +66,7 @@ return {
 				}
 				for _, name in ipairs({
 					"smart",
+					"git_log",
 					"files",
 					"grep",
 					"grep_word",
