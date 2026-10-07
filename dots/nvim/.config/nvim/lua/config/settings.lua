@@ -41,6 +41,46 @@ vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGai
 	pattern = { "*" },
 })
 
+-- The events above only fire on focus/idle (CursorHold waits 'updatetime',
+-- 4s by default), so external edits can sit unnoticed while you're looking
+-- right at the file. Watch each open file's directory and checktime on any
+-- change; the directory, not the file, since atomic saves replace the inode
+-- and kill a file-level watch.
+local dir_watchers = {}
+local checktime_timer = assert(vim.uv.new_timer())
+local function schedule_checktime()
+	checktime_timer:stop()
+	checktime_timer:start(
+		30,
+		0,
+		vim.schedule_wrap(function()
+			if vim.fn.mode() ~= "c" then
+				vim.cmd("silent! checktime")
+			end
+		end)
+	)
+end
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
+	callback = function(args)
+		if vim.bo[args.buf].buftype ~= "" then
+			return
+		end
+		local name = vim.api.nvim_buf_get_name(args.buf)
+		if name == "" then
+			return
+		end
+		local dir = vim.fs.dirname(vim.fn.fnamemodify(name, ":p"))
+		if dir_watchers[dir] then
+			return
+		end
+		local handle = vim.uv.new_fs_event()
+		if handle and handle:start(dir, {}, schedule_checktime) == 0 then
+			dir_watchers[dir] = handle
+		end
+	end,
+})
+
 opt.textwidth = 80
 
 vim.o.termguicolors = true
