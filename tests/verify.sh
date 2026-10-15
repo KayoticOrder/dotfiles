@@ -57,6 +57,23 @@ check_font() {
   echo "OK: font matching '$1' found"
 }
 
+verify_claude() {
+  check_link "$HOME/.claude/settings.json" "dots/claude/.claude/settings.json"
+  check_link "$HOME/.claude/skills/notes" "dots/claude/.claude/skills/notes"
+}
+
+verify_claude-japanese() {
+  check_link "$HOME/.claude/skills/anki-add-card" "dots/claude/.claude/skills/anki-add-card"
+  check_link "$HOME/.claude/skills/japanese-conversation" "dots/claude/.claude/skills/japanese-conversation"
+  check_link "$HOME/.claude/skills/jimaku-search" "dots/claude/.claude/skills/jimaku-search"
+  check_link "$HOME/.claude/skills/jimaku-to-anki" "dots/claude/.claude/skills/jimaku-to-anki"
+}
+
+verify_notes() {
+  check_link "$HOME/notes/AGENTS.md" "dots/notes/AGENTS.md"
+  check_link "$HOME/notes/templates" "dots/notes/templates"
+}
+
 verify_fonts() {
   # Explicit directory args, not a bare `fc-cache -f` - see the comment in
   # meta/configs/fonts.yaml for why.

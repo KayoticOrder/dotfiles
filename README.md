@@ -7,17 +7,19 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | Config | What it links/installs |
 | --- | --- |
 | `alacritty` | Alacritty terminal + themes |
-| `claude` | Claude Code settings, agents, commands, skills |
+| `claude` | Claude Code settings, agents, commands, `notes` skill |
+| `claude-japanese` | Japanese study / Anki skills (personal only) |
 | `fonts` | Iosevka Nerd Font + Iosevka Term, downloaded directly from upstream (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
+| `notes` | `~/notes` vault scaffolding: `AGENTS.md` schema + templates (notes themselves stay local) |
 | `nvim` | Neovim (lazy.nvim config) |
 | `obsidian` | Obsidian vault settings, templates, glossary |
 | `sesh` | sesh tmux session manager (pinned release binary) + per-repo session layout config |
 | `tmux` | tmux + plugins (TPM) |
 | `zsh` | zsh, oh-my-zsh, Powerlevel10k |
 
-`claude` and `obsidian` are standalone-only (not part of any profile) — install them explicitly with `install-standalone` if you want them on a given machine.
+`claude`, `claude-japanese`, `notes` and `obsidian` aren't in the `arch`/`ubuntu` profiles — install them explicitly with `install-standalone` if you want them on a given machine (e.g. `./install-standalone claude claude-japanese notes`).
 
 Each config lives under `dots/<name>` and is symlinked into place; the matching `meta/configs/<name>.yaml` declares its packages and links.
 
@@ -30,7 +32,7 @@ git clone --recursive https://github.com/KayoticOrder/dotbot-dotfiles.git ~/.dot
 cd ~/.dotfiles
 ```
 
-Install everything for this machine via a profile (see `meta/profiles/`):
+Install everything for this machine via a profile (see `meta/profiles/`: `arch`, `ubuntu`, `work`):
 
 ```bash
 ./install-profile arch
@@ -44,11 +46,26 @@ Or install individual configs:
 
 Both scripts run `git submodule update --init --recursive` automatically, then apply `meta/base.yaml` plus the requested config(s) through Dotbot.
 
+## Work machine
+
+The `work` profile (Ubuntu on WSL) installs only the shareable configs — no GUI terminals/fonts (Windows Terminal handles those), and nothing personal (`claude-japanese`, `obsidian`, `anki-vocab-builder`). Clone over HTTPS with no push credentials and treat it as pull-only; make changes on a personal machine.
+
+```bash
+./install-profile work
+git pull && ./install-profile work   # to update
+```
+
+Machine-specific shell settings go in `~/.zshrc.local`, which `.zshrc` sources if present and which is never committed.
+
+## Notes vault
+
+`~/notes` is long-term memory shared with any AI: one note per repo/topic, linked with `[[wikilinks]]`, cataloged in `index.md`. The `notes` config links in only the schema (`AGENTS.md`) and templates — the notes are plain local files, separate on every machine, so work notes never leave the work laptop. Open `~/notes` as an Obsidian vault to see the graph. Claude uses it via the `notes` skill; point other AIs at `~/notes/AGENTS.md`.
+
 ## How it works
 
 - `meta/base.yaml` — shared defaults (force-relink, create `~/.config`, prune broken symlinks).
 - `meta/configs/*.yaml` — one file per tool: packages to install and paths to symlink.
-- `meta/profiles/*` — plain-text lists of configs to install together for a given machine (`arch`, `ubuntu`).
+- `meta/profiles/*` — plain-text lists of configs to install together for a given machine (`arch`, `ubuntu`, `work`).
 - `meta/plugins/omnipkg.py` — custom Dotbot plugin that installs packages via whatever package manager is present (pacman, apt, dnf, or Homebrew).
 - `meta/plugins/yay.py` — custom Dotbot plugin for AUR packages via `yay`.
 
@@ -86,7 +103,7 @@ docker build -f tests/arch/Dockerfile \
   -t dotfiles-test .
 ```
 
-GitHub Actions (`.github/workflows/test.yml`) runs both distros, the full profile and each config individually, on every push/PR.
+GitHub Actions (`.github/workflows/test.yml`) runs both distros, each profile (`work` on ubuntu) and each config individually, on every push/PR.
 
 ## License
 

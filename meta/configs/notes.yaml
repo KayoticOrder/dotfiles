@@ -1,0 +1,9 @@
+# Only the schema and templates are linked; the notes themselves are local to
+# each machine and never committed here.
+- create:
+    - ~/notes/repos
+    - ~/notes/topics
+
+- link:
+    ~/notes/AGENTS.md: dots/notes/AGENTS.md
+    ~/notes/templates: dots/notes/templates

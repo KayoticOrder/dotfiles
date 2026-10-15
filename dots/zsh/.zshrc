@@ -129,4 +129,7 @@ set -o ignoreeof
 eval "$(zoxide init zsh --cmd z)"
 
 # Created by `pipx` on 2025-06-07 17:10:27
-export PATH="$PATH:/home/kayotic/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
+
+# Machine-specific settings (e.g. work), kept out of the repo.
+[[ ! -f ~/.zshrc.local ]] || source ~/.zshrc.local
