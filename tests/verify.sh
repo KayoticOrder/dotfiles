@@ -59,7 +59,7 @@ check_font() {
 
 verify_claude() {
   check_link "$HOME/.claude/settings.json" "dots/claude/.claude/settings.json"
-  check_link "$HOME/.claude/skills/notes" "dots/claude/.claude/skills/notes"
+  check_link "$HOME/.claude/skills/notes" "dots/notes/skill"
 }
 
 verify_claude-japanese() {
@@ -72,6 +72,11 @@ verify_claude-japanese() {
 verify_notes() {
   check_link "$HOME/notes/AGENTS.md" "dots/notes/AGENTS.md"
   check_link "$HOME/notes/templates" "dots/notes/templates"
+}
+
+verify_copilot() {
+  check_link "$HOME/.copilot/copilot-instructions.md" "dots/copilot/.copilot/copilot-instructions.md"
+  check_link "$HOME/.copilot/skills/notes" "dots/notes/skill"
 }
 
 verify_fonts() {

@@ -9,6 +9,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `alacritty` | Alacritty terminal + themes |
 | `claude` | Claude Code settings, agents, commands, `notes` skill |
 | `claude-japanese` | Japanese study / Anki skills (personal only) |
+| `copilot` | GitHub Copilot CLI user instructions + `notes` skill |
 | `fonts` | Iosevka Nerd Font + Iosevka Term, downloaded directly from upstream (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
@@ -19,7 +20,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `tmux` | tmux + plugins (TPM) |
 | `zsh` | zsh, oh-my-zsh, Powerlevel10k |
 
-`claude`, `claude-japanese`, `notes` and `obsidian` aren't in the `arch`/`ubuntu` profiles — install them explicitly with `install-standalone` if you want them on a given machine (e.g. `./install-standalone claude claude-japanese notes`).
+`claude`, `claude-japanese`, `copilot`, `notes` and `obsidian` aren't in the `arch`/`ubuntu` profiles — install them explicitly with `install-standalone` if you want them on a given machine (e.g. `./install-standalone claude claude-japanese notes`).
 
 Each config lives under `dots/<name>` and is symlinked into place; the matching `meta/configs/<name>.yaml` declares its packages and links.
 
@@ -48,7 +49,7 @@ Both scripts run `git submodule update --init --recursive` automatically, then a
 
 ## Work machine
 
-The `work` profile (Ubuntu on WSL) installs only the shareable configs — no GUI terminals/fonts (Windows Terminal handles those), and nothing personal (`claude-japanese`, `obsidian`, `anki-vocab-builder`). Clone over HTTPS with no push credentials and treat it as pull-only; make changes on a personal machine.
+The `work` profile (Ubuntu on WSL) installs only the shareable configs — no GUI terminals/fonts (Windows Terminal handles those), Copilot CLI instead of Claude Code, and nothing personal (`claude-japanese`, `obsidian`, `anki-vocab-builder`). Clone over HTTPS with no push credentials and treat it as pull-only; make changes on a personal machine.
 
 ```bash
 ./install-profile work
@@ -59,7 +60,7 @@ Machine-specific shell settings go in `~/.zshrc.local`, which `.zshrc` sources i
 
 ## Notes vault
 
-`~/notes` is long-term memory shared with any AI: one note per repo/topic, linked with `[[wikilinks]]`, cataloged in `index.md`. The `notes` config links in only the schema (`AGENTS.md`) and templates — the notes are plain local files, separate on every machine, so work notes never leave the work laptop. Open `~/notes` as an Obsidian vault to see the graph. Claude uses it via the `notes` skill; point other AIs at `~/notes/AGENTS.md`.
+`~/notes` is long-term memory shared with any AI: one note per repo/topic, linked with `[[wikilinks]]`, cataloged in `index.md`. The `notes` config links in only the schema (`AGENTS.md`) and templates — the notes are plain local files, separate on every machine, so work notes never leave the work laptop. Open `~/notes` as an Obsidian vault to see the graph. Claude Code and the Copilot CLI both use it via the same `notes` skill (`dots/notes/skill`, linked by the `claude` / `copilot` configs); point other AIs at `~/notes/AGENTS.md`.
 
 ## How it works
 
