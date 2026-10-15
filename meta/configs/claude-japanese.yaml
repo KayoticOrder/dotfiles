@@ -1,0 +1,5 @@
+- link:
+    ~/.claude/skills/anki-add-card: dots/claude/.claude/skills/anki-add-card
+    ~/.claude/skills/japanese-conversation: dots/claude/.claude/skills/japanese-conversation
+    ~/.claude/skills/jimaku-search: dots/claude/.claude/skills/jimaku-search
+    ~/.claude/skills/jimaku-to-anki: dots/claude/.claude/skills/jimaku-to-anki

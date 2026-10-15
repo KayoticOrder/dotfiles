@@ -11,7 +11,7 @@ description: Add a new tool config or platform profile to this dotbot-based dotf
 3. Vendored plugin/theme repo: add it as a submodule, `git submodule add <url> dots/<name>/.config/<name>/<subpath>`.
 4. `tests/verify.sh` — add a `verify_<name>` function using `check_link`/`check_bin` for every path this config symlinks and every binary it installs.
 5. `.github/workflows/test.yml` — add `<name>` to `configs.strategy.matrix.config`. Use `include:` instead if it's distro-specific (see how `hypr` is arch-only there).
-6. `meta/profiles/<profile>` — add `<name>` if it belongs in a bundled profile, or leave it out for a standalone-only config (see `claude`, `obsidian`).
+6. `meta/profiles/<profile>` — add `<name>` if it belongs in a bundled profile, or leave it out for a standalone-only config (see `claude`, `obsidian`). Anything personal (e.g. `claude-japanese`) must stay out of `meta/profiles/work`.
 7. `README.md` — add a row to the Contents table.
 
 # Adding a profile

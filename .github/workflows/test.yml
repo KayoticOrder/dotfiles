@@ -17,7 +17,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: [arch, ubuntu]
+        include:
+          - { distro: arch, profile: arch }
+          - { distro: ubuntu, profile: ubuntu }
+          - { distro: ubuntu, profile: work }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,7 +28,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      - name: Build and verify ${{ matrix.distro }} profile
+      - name: Build and verify ${{ matrix.profile }} profile on ${{ matrix.distro }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -35,12 +38,12 @@ jobs:
           # backend can serve corrupted/mismatched layers when multiple jobs
           # write to the same scope at once. Losing cross-job cache sharing
           # is worth it for build correctness.
-          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-profile-${{ matrix.distro }}
-          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-profile-${{ matrix.distro }}
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}-profile-${{ matrix.distro }}-${{ matrix.profile }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}-profile-${{ matrix.distro }}-${{ matrix.profile }}
           build-args: |
             INSTALLER=install-profile
-            TARGET=${{ matrix.distro }}
-            VERIFY_ARGS=--profile ${{ matrix.distro }}
+            TARGET=${{ matrix.profile }}
+            VERIFY_ARGS=--profile ${{ matrix.profile }}
 
   configs:
     runs-on: ubuntu-latest
@@ -48,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         distro: [arch, ubuntu]
-        config: [alacritty, fonts, kitty, nvim, sesh, tmux, zsh]
+        config: [alacritty, claude, claude-japanese, fonts, kitty, notes, nvim, sesh, tmux, zsh]
         # hypr isn't in Ubuntu's official archives, so it's Arch-only for now
         include:
           - distro: arch
