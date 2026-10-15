@@ -52,6 +52,7 @@ git submodule update --init --recursive
 # Checks if the file exists in meta/configs/ folder
 # Exits program if a dotbot config doesn't exist
 
+failedConfigs=()
 sudoSuffix="-sudo"
 exitIfConfigNotFound=false # used as a flag to exit IF a config file is NOT found
 for config in ${@}; do
@@ -122,10 +123,19 @@ for config in ${@}; do
     cmd=(sudo "${cmd[@]}")
   fi
 
-  "${cmd[@]}"
+  # Keep going on failure: base.yaml's package upgrade fails whenever sudo
+  # can't prompt, and aborting there would skip every later config's links.
+  if ! "${cmd[@]}"; then
+    failedConfigs+=("$config")
+  fi
   rm -f "$configFile"
 done
 
 cd "${BASE_DIR}"
+
+if [[ ${#failedConfigs[@]} -gt 0 ]]; then
+  echo -e "\n\033[1;31mSome tasks failed in:\033[0m ${failedConfigs[*]} (see output above)"
+  exit 1
+fi
 
 echo "Restart your terminal..."
