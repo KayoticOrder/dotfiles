@@ -214,6 +214,13 @@ return {
 				mode = { "n", "t" },
 				desc = "Toggle Terminal",
 			},
+			{
+				"<leader>tt",
+				function()
+					require("snacks").terminal.toggle()
+				end,
+				desc = "Toggle Terminal",
+			},
 			-- many terminals send <C-/> as <C-_>
 			{
 				"<C-_>",
