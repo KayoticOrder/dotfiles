@@ -3,7 +3,7 @@ return {
 	-- must load at startup, or enableOnVimEnter never sees VimEnter
 	lazy = false,
 	opts = {
-		width = 100,
+		width = 120,
 		autocmds = { enableOnVimEnter = true },
 	},
 	keys = {
