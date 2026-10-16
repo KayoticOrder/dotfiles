@@ -16,6 +16,7 @@ return {
 				{ "<leader>h", group = "harpoon" },
 				{ "<leader>q", group = "quit/session" },
 				{ "<leader>s", group = "search" },
+				{ "<leader>t", group = "terminal" },
 				{ "<leader>u", group = "ui", icon = { icon = "󰙵 ", color = "cyan" } },
 				{
 					"<leader>x",
