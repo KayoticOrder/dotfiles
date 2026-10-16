@@ -97,6 +97,18 @@ return {
 					},
 				},
 			})
+
+			-- clangd's defaults (indexer on every core, PCHs in RAM) can exhaust
+			-- WSL's memory on big projects and freeze the whole VM
+			vim.lsp.config("clangd", {
+				cmd = {
+					"clangd",
+					"-j=4",
+					"--background-index-priority=low",
+					"--pch-storage=disk",
+					"--malloc-trim",
+				},
+			})
 		end,
 	},
 	{
