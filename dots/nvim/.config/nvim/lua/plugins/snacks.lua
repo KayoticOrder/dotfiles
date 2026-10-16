@@ -43,6 +43,7 @@ return {
 		words = { enabled = true },
 		input = { enabled = true },
 		gitbrowse = {},
+		terminal = { win = { position = "float" } },
 		-- oil.nvim is gone; explorer now owns netrw replacement for directory buffers
 		explorer = { replace_netrw = true },
 		picker = {
@@ -204,6 +205,23 @@ return {
 					require("snacks").picker.undo()
 				end,
 				desc = "Undo History",
+			},
+			{
+				"<C-/>",
+				function()
+					require("snacks").terminal.toggle()
+				end,
+				mode = { "n", "t" },
+				desc = "Toggle Terminal",
+			},
+			-- many terminals send <C-/> as <C-_>
+			{
+				"<C-_>",
+				function()
+					require("snacks").terminal.toggle()
+				end,
+				mode = { "n", "t" },
+				desc = "which_key_ignore",
 			},
 			{
 				"<leader>go",
