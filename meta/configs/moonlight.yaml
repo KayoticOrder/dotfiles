@@ -6,3 +6,8 @@
     ~/.local/bin/desktop-stream: dots/moonlight/.local/bin/desktop-stream
     ~/.config/desktop-stream.conf: dots/moonlight/.config/desktop-stream.conf
     ~/.local/share/applications/desktop-stream.desktop: dots/moonlight/.local/share/applications/desktop-stream.desktop
+
+# ~/.local/bin isn't on PATH for a stock Arch bash login.
+- shell:
+  - command: sudo ln -sf "$HOME/.local/bin/desktop-stream" /usr/local/bin/desktop-stream
+    description: "Put desktop-stream on PATH for every shell"
