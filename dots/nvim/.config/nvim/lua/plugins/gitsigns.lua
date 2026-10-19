@@ -14,6 +14,7 @@ return {
     { "<leader>ghR", mode = { "n" }, function() require("gitsigns").reset_buffer() end, desc = "Reset Buffer" },
     { "<leader>ghp", mode = { "n" }, function() require("gitsigns").preview_hunk() end, desc = "Preview Hunk" },
     { "<leader>ghb", mode = { "n" }, function() require("gitsigns").blame_line { full = true } end, desc = "Blame Line (Full)" },
+    { "<leader>gB", mode = { "n" }, function() require("gitsigns").blame() end, desc = "Blame File" },
     { "<leader>gtb", mode = { "n" }, function() require("gitsigns").toggle_current_line_blame() end, desc = "Toggle Current Line Blame" },
     { "<leader>ghd", mode = { "n" }, function() require("gitsigns").diffthis() end, desc = "Diff This" },
     { "<leader>ghD", mode = { "n" }, function() require("gitsigns").diffthis("~") end, desc = "Diff This (Against ~)" },
