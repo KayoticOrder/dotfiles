@@ -18,7 +18,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpaper & waybar & dunst & fcitx5")
     hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
     -- Sunshine must start after the env import or it can't reach the Wayland session.
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && (systemctl --user restart sunshine || true)")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && (systemctl --user restart app-dev.lizardbyte.app.Sunshine || true)")
 end)
 
 
