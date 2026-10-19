@@ -1,0 +1,17 @@
+# Turns the laptop into a thin client: power on -> autologin on tty1 -> stream.
+# Moonlight renders straight to KMS here, so no compositor is needed.
+- shell:
+  - command: |
+      sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
+      printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin %s --noclear %%I $TERM\n' "$USER" \
+        | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null
+    description: "Autologin on tty1"
+  # Without a compositor, SDL reads keyboard/mouse straight from evdev.
+  - command: sudo usermod -aG input,video "$USER"
+    description: "Allow raw input/DRM access"
+  - command: |
+      line='[ "$(tty)" = /dev/tty1 ] && [ -z "$WAYLAND_DISPLAY" ] && ~/.local/bin/desktop-stream --kiosk'
+      for f in ~/.zprofile ~/.bash_profile; do
+        grep -qxF "$line" "$f" 2>/dev/null || echo "$line" >> "$f"
+      done
+    description: "Stream on tty1 login"

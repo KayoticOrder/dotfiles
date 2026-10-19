@@ -1,0 +1,8 @@
+# Streaming client. Run `desktop-stream --pair` once after installing.
+- omnipkg:
+  - install: [ moonlight-qt, wakeonlan, intel-media-driver, libva-intel-driver ]
+
+- link:
+    ~/.local/bin/desktop-stream: dots/moonlight/.local/bin/desktop-stream
+    ~/.config/desktop-stream.conf: dots/moonlight/.config/desktop-stream.conf
+    ~/.local/share/applications/desktop-stream.desktop: dots/moonlight/.local/share/applications/desktop-stream.desktop

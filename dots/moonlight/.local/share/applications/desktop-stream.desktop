@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Desktop Stream
+Comment=Wake and stream the desktop PC
+Exec=sh -c '"$HOME/.local/bin/desktop-stream"'
+Icon=moonlight
+Terminal=false
+Categories=Network;RemoteAccess;

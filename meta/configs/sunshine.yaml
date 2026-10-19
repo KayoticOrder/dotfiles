@@ -1,0 +1,18 @@
+# Streaming host: Sunshine + Wake-on-LAN. Pair the client with: desktop-stream --pair
+- yay:
+  - sunshine-bin
+
+- link:
+    ~/.config/sunshine/sunshine.conf: dots/sunshine/.config/sunshine/sunshine.conf
+    ~/.config/sunshine/apps.json: dots/sunshine/.config/sunshine/apps.json
+
+# Package upgrades replace the binary and drop the capability.
+- shell:
+  - command: sudo setcap cap_sys_admin+p "$(readlink -f "$(command -v sunshine)")"
+    description: "Grant Sunshine CAP_SYS_ADMIN for KMS capture"
+  - command: |
+      for dev in $(nmcli -g DEVICE,TYPE device | awk -F: '$2=="ethernet"{print $1}'); do
+        con=$(nmcli -g GENERAL.CONNECTION device show "$dev")
+        [ -n "$con" ] && sudo nmcli connection modify "$con" 802-3-ethernet.wake-on-lan magic
+      done
+    description: "Enable Wake-on-LAN on wired NICs (also enable it in the BIOS)"

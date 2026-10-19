@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Wake the desktop if needed and stream it fullscreen.
+#   desktop-stream          connect once
+#   desktop-stream --kiosk  reconnect forever (used by the tty1 autologin hook)
+#   desktop-stream --pair   one-time pairing with Sunshine
+set -uo pipefail
+
+conf=${XDG_CONFIG_HOME:-$HOME/.config}/desktop-stream.conf
+[ -f "$conf" ] && . "$conf"
+: "${HOST:?set HOST in $conf}"
+
+# 47989 is Sunshine's HTTP port, so this also waits for Sunshine itself, not just the machine.
+sunshine_up() { timeout 1 bash -c "</dev/tcp/$HOST/47989" 2>/dev/null; }
+
+wait_for_host() {
+  sunshine_up && return 0
+  if [ -n "${MAC:-}" ]; then
+    echo "Waking $HOST..."
+    wakeonlan "$MAC" >/dev/null
+  fi
+  for _ in $(seq 120); do
+    sunshine_up && return 0
+    sleep 1
+  done
+  echo "$HOST isn't answering." >&2
+  return 1
+}
+
+stream() {
+  wait_for_host || return 1
+  local args=(--display-mode fullscreen --absolute-mouse --no-game-optimization
+              --capture-system-keys fullscreen --no-vsync --no-audio-on-host)
+  [ -n "${RESOLUTION:-}" ] && args+=(--resolution "$RESOLUTION")
+  [ -n "${FPS:-}" ] && args+=(--fps "$FPS")
+  [ -n "${BITRATE:-}" ] && args+=(--bitrate "$BITRATE")
+  moonlight stream "$HOST" "${APP:-Desktop}" "${args[@]}"
+}
+
+case ${1:-} in
+  --pair)
+    wait_for_host || exit 1
+    pin=$(printf '%04d' $((RANDOM % 10000)))
+    echo "On the desktop open https://localhost:47990 -> PIN and enter: $pin"
+    exec moonlight pair "$HOST" --pin "$pin"
+    ;;
+  --kiosk)
+    while :; do
+      stream
+      echo "Stream ended. Reconnecting in 5s - press any key for a shell."
+      read -rsn1 -t 5 && exit 0
+    done
+    ;;
+  *)
+    stream
+    ;;
+esac
