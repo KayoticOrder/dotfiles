@@ -3,8 +3,11 @@
 - shell:
   - command: |
       sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-      printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin %s --noclear %%I $TERM\n' "$USER" \
-        | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null
+      sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<EOF
+      [Service]
+      ExecStart=
+      ExecStart=-/sbin/agetty --autologin $USER --noclear %I linux
+      EOF
     description: "Autologin on tty1"
   - command: |
       line='[ "$(tty)" = /dev/tty1 ] && [ -z "$WAYLAND_DISPLAY" ] && exec start-hyprland'
