@@ -1,0 +1,12 @@
+# Autologin on tty1 straight into Hyprland, so a Wake-on-LAN boot is streamable
+# without anyone at the keyboard. Anyone with physical access gets your desktop.
+- shell:
+  - command: |
+      sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
+      printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin %s --noclear %%I $TERM\n' "$USER" \
+        | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null
+    description: "Autologin on tty1"
+  - command: |
+      line='[ "$(tty)" = /dev/tty1 ] && [ -z "$WAYLAND_DISPLAY" ] && exec start-hyprland'
+      grep -qxF "$line" ~/.zprofile 2>/dev/null || echo "$line" >> ~/.zprofile
+    description: "Start Hyprland on tty1 login"
