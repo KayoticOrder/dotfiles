@@ -109,6 +109,8 @@ verify_kitty() {
 verify_nvim() {
   check_link "$HOME/.config/nvim" "dots/nvim/.config/nvim"
   check_bin nvim
+  check_bin dot
+  check_bin java
 }
 
 verify_sesh() {
