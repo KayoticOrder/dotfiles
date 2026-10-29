@@ -1,6 +1,7 @@
--- Per-repo build definitions live in an untracked .nvim-build.lua at the repo root
+-- Per-repo task definitions live in an untracked .nvim-tasks.lua at the repo root
 -- (see the example at the bottom of this file).
-local spec_file = ".nvim-build.lua"
+local spec_file = ".nvim-tasks.lua"
+local old_spec_file = ".nvim-build.lua"
 local rbuild = vim.fn.expand("~/.local/bin/rbuild")
 
 local function load_spec(root)
@@ -20,13 +21,16 @@ local function load_spec(root)
 	elseif type(spec) ~= "table" then
 		return nil, path .. " must return a table"
 	end
-	-- Remote settings used to sit at the top level and on each build; fail loudly rather than
-	-- silently building without them.
+	if spec.builds ~= nil then
+		return nil, path .. ": rename `builds` to `tasks`"
+	end
+	-- Remote settings used to sit at the top level and on each task; fail loudly rather than
+	-- silently running without them.
 	local old = { "host", "remote_dir", "sync", "artifacts", "exclude" }
-	for _, t in ipairs(vim.list_extend({ spec }, spec.builds or {})) do
+	for _, t in ipairs(vim.list_extend({ spec }, spec.tasks or {})) do
 		for _, key in ipairs(old) do
 			if t[key] ~= nil then
-				local where = t == spec and "" or (" in build '" .. tostring(t.name) .. "'")
+				local where = t == spec and "" or (" in task '" .. tostring(t.name) .. "'")
 				local msg = "%s: move `%s`%s under `remote` (remote_dir is now remote.dir)"
 				return nil, msg:format(path, key, where)
 			end
@@ -35,12 +39,23 @@ local function load_spec(root)
 	return spec
 end
 
--- Returns nil when the build runs locally. A build's remote table overrides the repo's key by key.
-local function remote_opts(spec, build)
-	if build.remote == false or (spec.remote == false and build.remote == nil) then
+local function find_spec(dir)
+	local root = vim.fs.root(dir, { spec_file, old_spec_file })
+	if not root then
+		return nil, nil, "No " .. spec_file .. " found"
+	elseif not vim.uv.fs_stat(vim.fs.joinpath(root, spec_file)) then
+		local msg = "%s: rename %s to %s (and `builds` to `tasks`)"
+		return nil, nil, msg:format(root, old_spec_file, spec_file)
+	end
+	return root, load_spec(root)
+end
+
+-- Returns nil when the task runs locally. A task's remote table overrides the repo's key by key.
+local function remote_opts(spec, task)
+	if task.remote == false or (spec.remote == false and task.remote == nil) then
 		return nil
 	end
-	return vim.tbl_extend("force", spec.remote or {}, build.remote or {})
+	return vim.tbl_extend("force", spec.remote or {}, task.remote or {})
 end
 
 local function rbuild_cmd(remote, cmd)
@@ -68,36 +83,32 @@ local function rbuild_cmd(remote, cmd)
 end
 
 local provider = {
-	name = "remote builds",
+	name = "project tasks",
 	cache_key = function(opts)
 		return vim.fs.find(spec_file, { upward = true, type = "file", path = opts.dir })[1]
 	end,
 	generator = function(opts)
-		local root = vim.fs.root(opts.dir, spec_file)
-		if not root then
-			return "No " .. spec_file .. " found"
-		end
-		local spec, err = load_spec(root)
+		local root, spec, err = find_spec(opts.dir)
 		if not spec then
 			return err
 		end
-		return vim.tbl_map(function(build)
+		return vim.tbl_map(function(task)
 			return {
-				name = build.name,
-				desc = build.desc,
-				params = build.params,
+				name = task.name,
+				desc = task.desc,
+				params = task.params,
 				builder = function(params)
-					local remote = remote_opts(spec, build)
+					local remote = remote_opts(spec, task)
 					return {
-						name = build.name,
-						cmd = remote and rbuild_cmd(remote, build.cmd(params)) or build.cmd(params),
+						name = task.name,
+						cmd = remote and rbuild_cmd(remote, task.cmd(params)) or task.cmd(params),
 						cwd = root,
 						-- A terminal buffer hard-wraps long lines, which breaks errorformat matching.
 						strategy = { "jobstart", use_terminal = false },
 						components = {
 							{
 								"on_output_quickfix",
-								errorformat = build.errorformat or spec.errorformat,
+								errorformat = task.errorformat or spec.errorformat,
 								open_on_exit = "failure",
 								set_diagnostics = true,
 							},
@@ -108,7 +119,7 @@ local provider = {
 					}
 				end,
 			}
-		end, spec.builds or {})
+		end, spec.tasks or {})
 	end,
 }
 
@@ -154,25 +165,19 @@ end
 -- overseer's own form only offers enum choices through nvim-cmp (this config uses blink), so
 -- ask for every param without a default here via vim.ui.select/input (snacks) and hand
 -- overseer a complete set, which skips its form.
-local function run_build()
-	local root = vim.fs.root(vim.fn.getcwd(), spec_file)
-	local spec, err
-	if root then
-		spec, err = load_spec(root)
-	else
-		err = "No " .. spec_file .. " found"
-	end
+local function pick_task()
+	local _, spec, err = find_spec(vim.fn.getcwd())
 	if not spec then
 		return vim.notify(err, vim.log.levels.WARN)
 	end
-	local fmt = function(build)
-		return build.name
+	local fmt = function(task)
+		return task.name
 	end
-	vim.ui.select(spec.builds or {}, { prompt = "Build", format_item = fmt }, function(build)
-		if not build then
+	vim.ui.select(spec.tasks or {}, { prompt = "Task", format_item = fmt }, function(task)
+		if not task then
 			return
 		end
-		local schema = build.params or {}
+		local schema = task.params or {}
 		local names = vim.tbl_filter(function(name)
 			return schema[name].default == nil
 		end, vim.tbl_keys(schema))
@@ -183,7 +188,7 @@ local function run_build()
 		local params = {}
 		local function ask(i)
 			if i > #names then
-				return require("overseer").run_task({ name = build.name, params = params })
+				return require("overseer").run_task({ name = task.name, params = params })
 			end
 			prompt_param(names[i], schema[names[i]], function(ok, value)
 				if ok then
@@ -213,10 +218,10 @@ return {
 	"stevearc/overseer.nvim",
 	cmd = { "OverseerRun", "OverseerToggle", "OverseerOpen", "OverseerShell", "OverseerTaskAction" },
 	keys = {
-		{ "<leader>mm", run_build, desc = "Run Build" },
-		{ "<leader>mr", restart_last, desc = "Rerun Last Build" },
-		{ "<leader>mo", "<cmd>OverseerToggle<cr>", desc = "Toggle Build Output" },
-		{ "<leader>ma", "<cmd>OverseerTaskAction<cr>", desc = "Build Task Action" },
+		{ "<leader>mm", pick_task, desc = "Run Task" },
+		{ "<leader>mr", restart_last, desc = "Rerun Last Task" },
+		{ "<leader>mo", "<cmd>OverseerToggle<cr>", desc = "Toggle Task Output" },
+		{ "<leader>ma", "<cmd>OverseerTaskAction<cr>", desc = "Task Action" },
 	},
 	config = function()
 		local overseer = require("overseer")
@@ -225,11 +230,11 @@ return {
 	end,
 }
 
---[[ Example .nvim-build.lua (keep it out of git, e.g. via ~/.config/git/ignore):
+--[[ Example .nvim-tasks.lua (keep it out of git, e.g. via ~/.config/git/ignore):
 
 return {
-	errorformat = nil, -- optional, for local and remote builds; defaults to Vim's 'errorformat'
-	-- settings for builds run on the build machine; `remote = false` makes every build local
+	errorformat = nil, -- optional, for local and remote tasks; defaults to Vim's 'errorformat'
+	-- settings for tasks run on the build machine; `remote = false` makes every task local
 	remote = {
 		host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
 		-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
@@ -240,15 +245,15 @@ return {
 		-- copy the working tree up first (tracked + untracked, minus gitignored);
 		-- overwrites remote edits to those files but never deletes remote files
 		sync = true,
-		-- copied back after a successful build: dirs (mirrored), files, or globs
+		-- copied back after a successful run: dirs (mirrored), files, or globs
 		artifacts = { "build/out" },
 		exclude = { "*.o", "*.map" }, -- rsync patterns skipped when copying artifacts back
 	},
-	builds = {
+	tasks = {
 		{
 			name = "waf build",
 			params = {
-				-- params without a default are asked for, in `order`, when the build starts
+				-- params without a default are asked for, in `order`, when the task starts
 				product = { type = "enum", choices = { "name", "other" }, order = 1 },
 				extra = { type = "list", delimiter = " ", optional = true, order = 2, desc = "Extra waf args" },
 			},

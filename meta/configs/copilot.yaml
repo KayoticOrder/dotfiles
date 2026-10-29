@@ -1,4 +1,8 @@
+# remote-builds was renamed to nvim-tasks; the old link still resolves, so clean won't drop it
+- shell:
+  - [ 'if [ -L "$HOME/.copilot/skills/remote-builds" ]; then rm "$HOME/.copilot/skills/remote-builds"; fi' ]
+
 - link:
     ~/.copilot/copilot-instructions.md: dots/copilot/.copilot/copilot-instructions.md
     ~/.copilot/skills/notes: dots/notes/skill
-    ~/.copilot/skills/remote-builds: dots/nvim/skill
+    ~/.copilot/skills/nvim-tasks: dots/nvim/skill
