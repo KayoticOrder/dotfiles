@@ -23,6 +23,9 @@ end
 
 local function rbuild_cmd(spec, cmd)
 	local ret = { rbuild }
+	if spec.sync then
+		table.insert(ret, "-s")
+	end
 	if spec.host then
 		vim.list_extend(ret, { "-H", spec.host })
 	end
@@ -114,6 +117,9 @@ return {
 	-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
 	remote_dir = "src/product-a",
 	artifacts = { "build/out" }, -- copied back after a successful build
+	-- copy the working tree up first (tracked + untracked, minus gitignored);
+	-- overwrites remote edits to those files but never deletes remote files
+	sync = true,
 	builds = {
 		{
 			name = "waf build",

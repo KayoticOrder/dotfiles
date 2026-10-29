@@ -3,15 +3,17 @@
 set -o pipefail
 
 usage() {
-	echo "usage: rbuild [-H host] [-d remote_dir] [-a artifact_dir]... -- command [args...]" >&2
+	echo "usage: rbuild [-s] [-H host] [-d remote_dir] [-a artifact_dir]... -- command [args...]" >&2
 	exit 2
 }
 
 host=${RBUILD_HOST:-buildbox}
 remote_dir=
 artifacts=()
-while getopts H:d:a: opt; do
+sync=
+while getopts sH:d:a: opt; do
 	case $opt in
+	s) sync=1 ;;
 	H) host=$OPTARG ;;
 	d) remote_dir=$OPTARG ;;
 	a) artifacts+=("$OPTARG") ;;
@@ -36,6 +38,14 @@ fi
 remote_root=$(ssh "$host" "cd $(printf %q "$remote_dir") && pwd -P") || exit
 from=$(printf '%s' "$remote_root" | sed 's/[][\.*^$#]/\\&/g')
 to=$(printf '%s' "$local_root" | sed 's/[\&#]/\\&/g')
+
+# Tracked plus untracked-but-not-ignored files, so build outputs and .git stay put remotely.
+# Remote copies of files deleted locally are left alone.
+if [ -n "$sync" ]; then
+	(cd "$local_root" && git ls-files -z -co --exclude-standard) |
+		rsync -az --from0 --files-from=- --ignore-missing-args "$local_root/" "$host:$remote_root/" ||
+		exit
+fi
 
 ssh "$host" "cd $(printf %q "$remote_root") && $(printf '%q ' "$@")" 2>&1 | sed "s#$from#$to#g" || exit
 
