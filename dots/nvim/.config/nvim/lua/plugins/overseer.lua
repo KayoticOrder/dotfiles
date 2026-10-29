@@ -61,7 +61,8 @@ local provider = {
 				builder = function(params)
 					return {
 						name = build.name,
-						cmd = rbuild_cmd(spec, build.cmd(params)),
+						cmd = build.remote == false and build.cmd(params)
+							or rbuild_cmd(spec, build.cmd(params)),
 						cwd = root,
 						-- A terminal buffer hard-wraps long lines, which breaks errorformat matching.
 						strategy = { "jobstart", use_terminal = false },
@@ -124,11 +125,20 @@ return {
 		{
 			name = "waf build",
 			params = {
-				product = { type = "enum", choices = { "name", "other" }, default = "name" },
+				-- overseer only shows the form when a param has no default
+				product = { type = "enum", choices = { "name", "other" } },
 				extra = { type = "list", delimiter = " ", optional = true, desc = "Extra waf args" },
 			},
 			cmd = function(p)
 				return vim.list_extend({ "./drun", "./waf", "--product=" .. p.product }, p.extra or {})
+			end,
+		},
+		{
+			name = "waf build (local)",
+			remote = false, -- run on this machine instead of the build machine
+			params = { product = { type = "enum", choices = { "name", "other" } } },
+			cmd = function(p)
+				return { "./waf", "--product=" .. p.product }
 			end,
 		},
 	},
