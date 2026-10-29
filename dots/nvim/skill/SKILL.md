@@ -17,7 +17,8 @@ If either file is missing, stop and tell the user to run `./install-standalone n
 return {
 	host = "buildbox", -- optional; ssh host, else $RBUILD_HOST, else "buildbox"
 	remote_dir = "src/x", -- optional; relative to remote $HOME, else the repo's path under local $HOME
-	artifacts = { "build/out" }, -- optional; repo-relative dirs rsynced back after a successful build
+	artifacts = { "build/out" }, -- optional; repo-relative dirs (mirrored), files or globs, copied back after a successful build
+	exclude = { "*.o" }, -- optional; rsync patterns skipped when copying artifacts back
 	sync = true, -- optional; copy the working tree up first (tracked + untracked, minus gitignored, submodules too)
 	errorformat = nil, -- optional; default is Vim's 'errorformat'
 	builds = {
@@ -28,13 +29,15 @@ return {
 			},
 			cmd = function(p) return { "./waf", "--product=" .. p.product } end, -- argv list, run from the repo root
 			remote = false, -- optional; run locally instead of through rbuild
+			artifacts = nil, exclude = nil, -- optional; override the top-level ones for this build
 			errorformat = nil, -- optional; overrides the top-level one
 		},
 	},
 }
 ```
 
-- **Prompting:** overseer shows the argument form only if some param has no `default`. A param with a `default` is filled in silently; `optional = true` may be left blank. Pick defaults based on whether the user wants to be asked.
+- **Prompting:** `<leader>mm` asks for every param without a `default`, one at a time in `order` (then by name): a picker for `enum`/`boolean`, a text prompt otherwise. A param with a `default` is filled in silently; `optional = true` may be left blank. Pick defaults based on whether the user wants to be asked. (`:OverseerRun` uses overseer's own form instead, whose enum choices only appear with nvim-cmp, which this config doesn't use.)
+- **Artifacts:** a dir is mirrored (local files missing remotely are deleted, except ones matching `exclude`); files and globs are just copied. An entry that matches nothing fails the task even if the build passed.
 - **Keep it out of git:** it must never be committed. Check with `git check-ignore -v .nvim-build.lua`; if it isn't ignored, offer to add `.nvim-build.lua` to `~/.config/git/ignore`.
 - **Trust:** Neovim asks the user to trust the file the first time and after every change (`vim.secure.read`). Tell them to expect that prompt after you edit it.
 
@@ -57,4 +60,4 @@ return {
 - **Quickfix entries point at missing files:** check that the output's paths are under the remote repo root (only that prefix is rewritten) or relative to a directory the output announces ("Entering directory"). Errors from paths outside the repo (system headers, other checkouts) can't be mapped.
 - **No builds in the picker:** Neovim's cwd must be inside the repo; check `:messages` for a Lua error or "is not trusted" (they denied the trust prompt; `:trust` re-allows the current file).
 - **Long lines wrap or colors show up in output:** the task already uses a non-terminal buffer; color must be coming from the command itself, so turn it off there (e.g. `--color=never`).
-- **Artifacts didn't come back:** they're only copied after the build exits 0, and only the listed `artifacts` dirs.
+- **Artifacts didn't come back:** they're only copied after the build exits 0, only the entries listed (a build's own `artifacts` replaces the top-level list), and never ones matching `exclude`.

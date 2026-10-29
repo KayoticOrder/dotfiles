@@ -3,20 +3,22 @@
 set -o pipefail
 
 usage() {
-	echo "usage: rbuild [-s] [-H host] [-d remote_dir] [-a artifact_dir]... -- command [args...]" >&2
+	echo "usage: rbuild [-s] [-H host] [-d remote_dir] [-a artifact]... [-x exclude]... -- command [args...]" >&2
 	exit 2
 }
 
 host=${RBUILD_HOST:-buildbox}
 remote_dir=
 artifacts=()
+excludes=()
 sync=
-while getopts sH:d:a: opt; do
+while getopts sH:d:a:x: opt; do
 	case $opt in
 	s) sync=1 ;;
 	H) host=$OPTARG ;;
 	d) remote_dir=$OPTARG ;;
 	a) artifacts+=("$OPTARG") ;;
+	x) excludes+=(--exclude "$OPTARG") ;;
 	*) usage ;;
 	esac
 done
@@ -57,7 +59,12 @@ fi
 
 ssh "$host" "cd $(printf %q "$remote_root") && $(printf '%q ' "$@")" 2>&1 | sed "s#$from#$to#g" || exit
 
-for a in "${artifacts[@]}"; do
-	mkdir -p "$local_root/$a" &&
-		rsync -az --delete "$host:$remote_root/$a/" "$local_root/$a/" || exit
-done
+# Artifacts are repo-relative dirs, files or globs (expanded remotely). The /./ makes -R keep
+# each path below the repo root; --delete only mirrors dirs and spares excluded files.
+if [ ${#artifacts[@]} -gt 0 ]; then
+	srcs=()
+	for a in "${artifacts[@]}"; do
+		srcs+=("$host:$remote_root/./$a")
+	done
+	rsync -azR --delete "${excludes[@]}" "${srcs[@]}" "$local_root/" || exit
+fi
