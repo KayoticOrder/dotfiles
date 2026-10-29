@@ -60,7 +60,7 @@ check_font() {
 verify_claude() {
   check_link "$HOME/.claude/settings.json" "dots/claude/.claude/settings.json"
   check_link "$HOME/.claude/skills/notes" "dots/notes/skill"
-  check_link "$HOME/.claude/skills/remote-builds" "dots/nvim/skill"
+  check_link "$HOME/.claude/skills/nvim-tasks" "dots/nvim/skill"
 }
 
 verify_claude-japanese() {
@@ -78,7 +78,7 @@ verify_notes() {
 verify_copilot() {
   check_link "$HOME/.copilot/copilot-instructions.md" "dots/copilot/.copilot/copilot-instructions.md"
   check_link "$HOME/.copilot/skills/notes" "dots/notes/skill"
-  check_link "$HOME/.copilot/skills/remote-builds" "dots/nvim/skill"
+  check_link "$HOME/.copilot/skills/nvim-tasks" "dots/nvim/skill"
 }
 
 verify_fonts() {

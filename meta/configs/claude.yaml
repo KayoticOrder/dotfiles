@@ -2,10 +2,12 @@
 # through it would make force-relink delete the skill dirs in the repo itself.
 - shell:
   - [ 'if [ -L "$HOME/.claude/skills" ]; then rm "$HOME/.claude/skills"; fi' ]
+  # renamed to nvim-tasks; the old link still resolves, so clean won't drop it
+  - [ 'if [ -L "$HOME/.claude/skills/remote-builds" ]; then rm "$HOME/.claude/skills/remote-builds"; fi' ]
 
 - link:
     ~/.claude/settings.json: dots/claude/.claude/settings.json
     ~/.claude/agents: dots/claude/.claude/agents
     ~/.claude/commands: dots/claude/.claude/commands
     ~/.claude/skills/notes: dots/notes/skill
-    ~/.claude/skills/remote-builds: dots/nvim/skill
+    ~/.claude/skills/nvim-tasks: dots/nvim/skill
