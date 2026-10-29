@@ -17,23 +17,48 @@ local function load_spec(root)
 	local ok, spec = pcall(chunk)
 	if not ok then
 		return nil, spec
+	elseif type(spec) ~= "table" then
+		return nil, path .. " must return a table"
+	end
+	-- Remote settings used to sit at the top level and on each build; fail loudly rather than
+	-- silently building without them.
+	local old = { "host", "remote_dir", "sync", "artifacts", "exclude" }
+	for _, t in ipairs(vim.list_extend({ spec }, spec.builds or {})) do
+		for _, key in ipairs(old) do
+			if t[key] ~= nil then
+				local where = t == spec and "" or (" in build '" .. tostring(t.name) .. "'")
+				local msg = "%s: move `%s`%s under `remote` (remote_dir is now remote.dir)"
+				return nil, msg:format(path, key, where)
+			end
+		end
 	end
 	return spec
 end
 
-local function rbuild_cmd(spec, cmd)
+-- Returns nil when the build runs locally. A build's remote table overrides the repo's key by key.
+local function remote_opts(spec, build)
+	if build.remote == false or (spec.remote == false and build.remote == nil) then
+		return nil
+	end
+	return vim.tbl_extend("force", spec.remote or {}, build.remote or {})
+end
+
+local function rbuild_cmd(remote, cmd)
 	local ret = { rbuild }
-	if spec.sync then
+	if remote.sync then
 		table.insert(ret, "-s")
 	end
-	if spec.host then
-		vim.list_extend(ret, { "-H", spec.host })
+	if remote.host then
+		vim.list_extend(ret, { "-H", remote.host })
 	end
-	if spec.remote_dir then
-		vim.list_extend(ret, { "-d", spec.remote_dir })
+	if remote.dir then
+		vim.list_extend(ret, { "-d", remote.dir })
 	end
-	for _, dir in ipairs(spec.artifacts or {}) do
-		vim.list_extend(ret, { "-a", dir })
+	for _, artifact in ipairs(remote.artifacts or {}) do
+		vim.list_extend(ret, { "-a", artifact })
+	end
+	for _, pattern in ipairs(remote.exclude or {}) do
+		vim.list_extend(ret, { "-x", pattern })
 	end
 	table.insert(ret, "--")
 	return vim.list_extend(ret, cmd)
@@ -59,10 +84,10 @@ local provider = {
 				desc = build.desc,
 				params = build.params,
 				builder = function(params)
+					local remote = remote_opts(spec, build)
 					return {
 						name = build.name,
-						cmd = build.remote == false and build.cmd(params)
-							or rbuild_cmd(spec, build.cmd(params)),
+						cmd = remote and rbuild_cmd(remote, build.cmd(params)) or build.cmd(params),
 						cwd = root,
 						-- A terminal buffer hard-wraps long lines, which breaks errorformat matching.
 						strategy = { "jobstart", use_terminal = false },
@@ -82,6 +107,90 @@ local provider = {
 	end,
 }
 
+local function parse_input(param, input)
+	local t = param.type or "string"
+	if t == "list" then
+		return vim.split(input, param.delimiter or ",", { plain = true, trimempty = true })
+	elseif t == "number" or t == "integer" then
+		return tonumber(input)
+	end
+	return input
+end
+
+-- Calls done(ok, value); ok is false when the user cancels or gives an invalid value.
+local function prompt_param(name, param, done)
+	local label = param.name or name
+	if param.type == "enum" or param.type == "boolean" then
+		local choices = param.type == "boolean" and { true, false } or param.choices
+		vim.ui.select(choices, { prompt = label, format_item = tostring }, function(choice)
+			done(choice ~= nil, choice)
+		end)
+		return
+	end
+	local prompt = label .. (param.desc and " (" .. param.desc .. ")" or "") .. ": "
+	vim.ui.input({ prompt = prompt }, function(input)
+		if input == nil then
+			return done(false)
+		elseif input == "" then
+			if not param.optional then
+				vim.notify(label .. " is required", vim.log.levels.ERROR)
+			end
+			return done(param.optional == true, nil)
+		end
+		local value = parse_input(param, input)
+		if value == nil then
+			local msg = string.format("Invalid %s for %s: %s", param.type, label, input)
+			vim.notify(msg, vim.log.levels.ERROR)
+		end
+		done(value ~= nil, value)
+	end)
+end
+
+-- overseer's own form only offers enum choices through nvim-cmp (this config uses blink), so
+-- ask for every param without a default here via vim.ui.select/input (snacks) and hand
+-- overseer a complete set, which skips its form.
+local function run_build()
+	local root = vim.fs.root(vim.fn.getcwd(), spec_file)
+	local spec, err
+	if root then
+		spec, err = load_spec(root)
+	else
+		err = "No " .. spec_file .. " found"
+	end
+	if not spec then
+		return vim.notify(err, vim.log.levels.WARN)
+	end
+	local fmt = function(build)
+		return build.name
+	end
+	vim.ui.select(spec.builds or {}, { prompt = "Build", format_item = fmt }, function(build)
+		if not build then
+			return
+		end
+		local schema = build.params or {}
+		local names = vim.tbl_filter(function(name)
+			return schema[name].default == nil
+		end, vim.tbl_keys(schema))
+		table.sort(names, function(a, b)
+			local oa, ob = schema[a].order or math.huge, schema[b].order or math.huge
+			return oa == ob and a < b or oa < ob
+		end)
+		local params = {}
+		local function ask(i)
+			if i > #names then
+				return require("overseer").run_task({ name = build.name, params = params })
+			end
+			prompt_param(names[i], schema[names[i]], function(ok, value)
+				if ok then
+					params[names[i]] = value
+					ask(i + 1)
+				end
+			end)
+		end
+		ask(1)
+	end)
+end
+
 local function restart_last()
 	local overseer = require("overseer")
 	local tasks = overseer.list_tasks({
@@ -99,7 +208,7 @@ return {
 	"stevearc/overseer.nvim",
 	cmd = { "OverseerRun", "OverseerToggle", "OverseerOpen", "OverseerShell", "OverseerTaskAction" },
 	keys = {
-		{ "<leader>mm", "<cmd>OverseerRun<cr>", desc = "Run Build" },
+		{ "<leader>mm", run_build, desc = "Run Build" },
 		{ "<leader>mr", restart_last, desc = "Rerun Last Build" },
 		{ "<leader>mo", "<cmd>OverseerToggle<cr>", desc = "Toggle Build Output" },
 		{ "<leader>ma", "<cmd>OverseerTaskAction<cr>", desc = "Build Task Action" },
@@ -114,21 +223,29 @@ return {
 --[[ Example .nvim-build.lua (keep it out of git, e.g. via ~/.config/git/ignore):
 
 return {
-	host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
-	-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
-	remote_dir = "src/product-a",
-	artifacts = { "build/out" }, -- copied back after a successful build
-	-- copy the working tree up first (tracked + untracked, minus gitignored);
-	-- overwrites remote edits to those files but never deletes remote files
-	sync = true,
+	errorformat = nil, -- optional, for local and remote builds; defaults to Vim's 'errorformat'
+	-- settings for builds run on the build machine; `remote = false` makes every build local
+	remote = {
+		host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
+		-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
+		dir = "src/product-a",
+		-- copy the working tree up first (tracked + untracked, minus gitignored);
+		-- overwrites remote edits to those files but never deletes remote files
+		sync = true,
+		-- copied back after a successful build: dirs (mirrored), files, or globs
+		artifacts = { "build/out" },
+		exclude = { "*.o", "*.map" }, -- rsync patterns skipped when copying artifacts back
+	},
 	builds = {
 		{
 			name = "waf build",
 			params = {
-				-- overseer only shows the form when a param has no default
-				product = { type = "enum", choices = { "name", "other" } },
-				extra = { type = "list", delimiter = " ", optional = true, desc = "Extra waf args" },
+				-- params without a default are asked for, in `order`, when the build starts
+				product = { type = "enum", choices = { "name", "other" }, order = 1 },
+				extra = { type = "list", delimiter = " ", optional = true, order = 2, desc = "Extra waf args" },
 			},
+			-- overrides the repo's remote settings key by key; the rest (host, sync, ...) still apply
+			remote = { artifacts = { "build/out/name/*.bin", "build/out/name/app.elf" } },
 			cmd = function(p)
 				return vim.list_extend({ "./drun", "./waf", "--product=" .. p.product }, p.extra or {})
 			end,
