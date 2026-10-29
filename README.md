@@ -14,7 +14,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
 | `notes` | `~/notes` vault scaffolding: `AGENTS.md` schema + templates (notes themselves stay local) |
-| `nvim` | Neovim (lazy.nvim config) |
+| `nvim` | Neovim (lazy.nvim config) + `rbuild` remote-build helper |
 | `obsidian` | Obsidian vault settings, templates, glossary |
 | `sesh` | sesh tmux session manager (pinned release binary) + per-repo session layout config |
 | `tmux` | tmux + plugins (TPM) |
