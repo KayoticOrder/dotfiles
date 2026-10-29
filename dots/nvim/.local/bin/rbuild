@@ -41,10 +41,18 @@ to=$(printf '%s' "$local_root" | sed 's/[\&#]/\\&/g')
 
 # Tracked plus untracked-but-not-ignored files, so build outputs and .git stay put remotely.
 # Remote copies of files deleted locally are left alone.
+sync_tree() {
+	git -C "$local_root/$1" ls-files -z -co --exclude-standard |
+		rsync -az --from0 --files-from=- --ignore-missing-args \
+			"$local_root/$1" "$host:$remote_root/$1"
+}
+
 if [ -n "$sync" ]; then
-	(cd "$local_root" && git ls-files -z -co --exclude-standard) |
-		rsync -az --from0 --files-from=- --ignore-missing-args "$local_root/" "$host:$remote_root/" ||
-		exit
+	sync_tree "" || exit
+	# ls-files lists a submodule as a bare directory, so each one gets its own pass.
+	while IFS= read -r -d '' sub; do
+		sync_tree "$sub/" || exit
+	done < <(cd "$local_root" && git submodule foreach --recursive --quiet 'printf "%s\0" "$displaypath"')
 fi
 
 ssh "$host" "cd $(printf %q "$remote_root") && $(printf '%q ' "$@")" 2>&1 | sed "s#$from#$to#g" || exit
