@@ -58,9 +58,10 @@ return {
 
 ## Troubleshooting
 
-- **"the input device is not a TTY":** the build wrapper passes `-t`/`-it` to `docker run`, but builds run without a terminal. It should only add `-t` when `[ -t 0 ]`.
+- **"the input device is not a TTY":** remote builds get a terminal (`ssh -tt`), so this should only happen for a `remote = false` build, which runs without one. Have the wrapper add `-t` to `docker run` only when `[ -t 0 ]`.
+- **Output only appears at the end:** `rbuild` gives remote builds a terminal so they flush line by line, and its `sed` runs unbuffered. A local build has no terminal, so a program that buffers when piped (Python, including waf) holds its output; set `PYTHONUNBUFFERED=1` or the tool's own flag in its `cmd`.
 - **Builds stale code / line numbers don't match:** the build machine has its own checkout; enable `sync` or have the user push and pull.
 - **Quickfix entries point at missing files:** check that the output's paths are under the remote repo root (only that prefix is rewritten) or relative to a directory the output announces ("Entering directory"). Errors from paths outside the repo (system headers, other checkouts) can't be mapped.
 - **No builds in the picker:** Neovim's cwd must be inside the repo; check `:messages` for a Lua error or "is not trusted" (they denied the trust prompt; `:trust` re-allows the current file).
-- **Long lines wrap or colors show up in output:** the task already uses a non-terminal buffer; color must be coming from the command itself, so turn it off there (e.g. `--color=never`).
+- **Long lines wrap or colors show up in output:** the task already uses a non-terminal buffer, and `rbuild` strips color codes from remote output; leftover escape codes are ones its pattern doesn't cover, so turn color off in the command itself (e.g. `--color=never`).
 - **Artifacts didn't come back:** they're only copied after the build exits 0, only the entries listed (a build's `remote.artifacts` replaces the repo's list rather than adding to it), and never ones matching `exclude`.
