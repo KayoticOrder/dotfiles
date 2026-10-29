@@ -98,6 +98,8 @@ local provider = {
 								open_on_exit = "failure",
 								set_diagnostics = true,
 							},
+							-- open_output skips opening on start when on_output_quickfix is attached
+							{ "open_output", on_start = "always" },
 							"default",
 						},
 					}

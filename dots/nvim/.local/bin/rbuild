@@ -57,7 +57,10 @@ if [ -n "$sync" ]; then
 	done < <(cd "$local_root" && git submodule foreach --recursive --quiet 'printf "%s\0" "$displaypath"')
 fi
 
-ssh "$host" "cd $(printf %q "$remote_root") && $(printf '%q ' "$@")" 2>&1 | sed "s#$from#$to#g" || exit
+# A remote pty makes the build flush output line by line (and stops it when rbuild is killed);
+# strip the CRs and color codes it adds, and keep sed unbuffered so progress shows live.
+ssh -qtt "$host" "cd $(printf %q "$remote_root") && $(printf '%q ' "$@")" 2>&1 |
+	sed -u -e 's/\r$//' -e 's/\x1b\[[0-9;?]*[A-Za-z]//g' -e "s#$from#$to#g" || exit
 
 # Artifacts are repo-relative dirs, files or globs (expanded remotely). The /./ makes -R keep
 # each path below the repo root; --delete only mirrors dirs and spares excluded files.
