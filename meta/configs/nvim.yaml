@@ -3,9 +3,11 @@
     - neovim
     - ripgrep
     - lldb
+    - rsync
     # plantuml-previewer.vim renders locally with its bundled jar
     - graphviz
     - { pac: jre-openjdk, apt: default-jre, dnf: java-latest-openjdk, brew: openjdk }
 
 - link:
     ~/.config/nvim: dots/nvim/.config/nvim
+    ~/.local/bin/rbuild: dots/nvim/.local/bin/rbuild

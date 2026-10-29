@@ -14,6 +14,7 @@ return {
 				{ "<leader>gh", group = "hunks" },
 				{ "<leader>o", group = "notes" },
 				{ "<leader>h", group = "harpoon" },
+				{ "<leader>m", group = "make/build" },
 				{ "<leader>q", group = "quit/session" },
 				{ "<leader>s", group = "search" },
 				{ "<leader>t", group = "terminal" },

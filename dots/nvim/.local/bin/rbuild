@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Run a build on the build machine from the current repo and pull its artifacts back.
+set -o pipefail
+
+usage() {
+	echo "usage: rbuild [-s] [-H host] [-d remote_dir] [-a artifact_dir]... -- command [args...]" >&2
+	exit 2
+}
+
+host=${RBUILD_HOST:-buildbox}
+remote_dir=
+artifacts=()
+sync=
+while getopts sH:d:a: opt; do
+	case $opt in
+	s) sync=1 ;;
+	H) host=$OPTARG ;;
+	d) remote_dir=$OPTARG ;;
+	a) artifacts+=("$OPTARG") ;;
+	*) usage ;;
+	esac
+done
+shift $((OPTIND - 1))
+[ $# -gt 0 ] || usage
+
+local_root=$(git rev-parse --show-toplevel 2>/dev/null) || local_root=$PWD
+if [ -z "$remote_dir" ]; then
+	case $local_root in
+	"$HOME"/*) remote_dir=${local_root#"$HOME"/} ;;
+	*)
+		echo "rbuild: $local_root is outside \$HOME, pass -d" >&2
+		exit 2
+		;;
+	esac
+fi
+
+# Compilers print physical paths, so resolve symlinks before rewriting them to local ones.
+remote_root=$(ssh "$host" "cd $(printf %q "$remote_dir") && pwd -P") || exit
+from=$(printf '%s' "$remote_root" | sed 's/[][\.*^$#]/\\&/g')
+to=$(printf '%s' "$local_root" | sed 's/[\&#]/\\&/g')
+
+# Tracked plus untracked-but-not-ignored files, so build outputs and .git stay put remotely.
+# Remote copies of files deleted locally are left alone.
+sync_tree() {
+	git -C "$local_root/$1" ls-files -z -co --exclude-standard |
+		rsync -az --from0 --files-from=- --ignore-missing-args \
+			"$local_root/$1" "$host:$remote_root/$1"
+}
+
+if [ -n "$sync" ]; then
+	sync_tree "" || exit
+	# ls-files lists a submodule as a bare directory, so each one gets its own pass.
+	while IFS= read -r -d '' sub; do
+		sync_tree "$sub/" || exit
+	done < <(cd "$local_root" && git submodule foreach --recursive --quiet 'printf "%s\0" "$displaypath"')
+fi
+
+ssh "$host" "cd $(printf %q "$remote_root") && $(printf '%q ' "$@")" 2>&1 | sed "s#$from#$to#g" || exit
+
+for a in "${artifacts[@]}"; do
+	mkdir -p "$local_root/$a" &&
+		rsync -az --delete "$host:$remote_root/$a/" "$local_root/$a/" || exit
+done
