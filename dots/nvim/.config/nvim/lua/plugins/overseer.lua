@@ -45,6 +45,9 @@ end
 
 local function rbuild_cmd(remote, cmd)
 	local ret = { rbuild }
+	if remote.checkout then
+		table.insert(ret, "-c")
+	end
 	if remote.sync then
 		table.insert(ret, "-s")
 	end
@@ -231,6 +234,9 @@ return {
 		host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
 		-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
 		dir = "src/product-a",
+		-- check out your local HEAD commit there first (fetched, detached); discards edits to
+		-- tracked files on the build machine, keeps untracked ones. The commit must be pushed.
+		checkout = true,
 		-- copy the working tree up first (tracked + untracked, minus gitignored);
 		-- overwrites remote edits to those files but never deletes remote files
 		sync = true,

@@ -3,7 +3,7 @@
 set -o pipefail
 
 usage() {
-	echo "usage: rbuild [-s] [-H host] [-d remote_dir] [-a artifact]... [-x exclude]... -- command [args...]" >&2
+	echo "usage: rbuild [-c] [-s] [-H host] [-d remote_dir] [-a artifact]... [-x exclude]... -- command [args...]" >&2
 	exit 2
 }
 
@@ -12,8 +12,10 @@ remote_dir=
 artifacts=()
 excludes=()
 sync=
-while getopts sH:d:a:x: opt; do
+checkout=
+while getopts csH:d:a:x: opt; do
 	case $opt in
+	c) checkout=1 ;;
 	s) sync=1 ;;
 	H) host=$OPTARG ;;
 	d) remote_dir=$OPTARG ;;
@@ -40,6 +42,20 @@ fi
 remote_root=$(ssh "$host" "cd $(printf %q "$remote_dir") && pwd -P") || exit
 from=$(printf '%s' "$remote_root" | sed 's/[][\.*^$#]/\\&/g')
 to=$(printf '%s' "$local_root" | sed 's/[\&#]/\\&/g')
+
+# Put the build machine on the same commit (detached), discarding edits to tracked files there:
+# its checkout is treated as a mirror, and -s re-applies local edits on top. Untracked files stay.
+if [ -n "$checkout" ]; then
+	sha=$(git -C "$local_root" rev-parse HEAD) || exit
+	ssh "$host" "cd $(printf %q "$remote_root") || exit
+		git fetch --quiet --all || exit
+		if ! git cat-file -e '$sha^{commit}' 2>/dev/null; then
+			echo 'rbuild: commit $sha is not on the build machine; push it first' >&2
+			exit 1
+		fi
+		git checkout --quiet --force --detach $sha &&
+			git submodule update --quiet --init --recursive --force" || exit
+fi
 
 # Tracked plus untracked-but-not-ignored files, so build outputs and .git stay put remotely.
 # Remote copies of files deleted locally are left alone.

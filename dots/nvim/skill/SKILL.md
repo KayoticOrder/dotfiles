@@ -19,6 +19,7 @@ return {
 	remote = { -- optional; settings for builds run on the build machine, or `false` to make every build local
 		host = "buildbox", -- optional; ssh host, else $RBUILD_HOST, else "buildbox"
 		dir = "src/x", -- optional; relative to remote $HOME, else the repo's path under local $HOME
+		checkout = true, -- optional; fetch and check out the local HEAD commit there first (detached, submodules updated)
 		sync = true, -- optional; copy the working tree up first (tracked + untracked, minus gitignored, submodules too)
 		artifacts = { "build/out" }, -- optional; repo-relative dirs (mirrored), files or globs, copied back after a successful build
 		exclude = { "*.o" }, -- optional; rsync patterns skipped when copying artifacts back
@@ -39,6 +40,7 @@ return {
 ```
 
 - **Prompting:** `<leader>mm` asks for every param without a `default`, one at a time in `order` (then by name): a picker for `enum`/`boolean`, a text prompt otherwise. A param with a `default` is filled in silently; `optional = true` may be left blank. Pick defaults based on whether the user wants to be asked. (`:OverseerRun` uses overseer's own form instead, whose enum choices only appear with nvim-cmp, which this config doesn't use.)
+- **`checkout` is destructive on the build machine:** it treats that checkout as a mirror. Each build leaves it on a detached HEAD at the local commit and throws away edits to tracked files there (untracked files and commits are kept). Make sure the user doesn't edit on the build machine before turning it on.
 - **Old layout:** files from before `remote` existed (top-level `host`/`remote_dir`/`sync`/`artifacts`/`exclude`, or per-build `artifacts`/`exclude`) fail to load with an error naming the key. Move them under `remote`, renaming `remote_dir` to `dir`.
 - **Artifacts:** a dir is mirrored (local files missing remotely are deleted, except ones matching `exclude`); files and globs are just copied. An entry that matches nothing fails the task even if the build passed.
 - **Keep it out of git:** it must never be committed. Check with `git check-ignore -v .nvim-build.lua`; if it isn't ignored, offer to add `.nvim-build.lua` to `~/.config/git/ignore`.
@@ -60,7 +62,8 @@ return {
 
 - **"the input device is not a TTY":** remote builds get a terminal (`ssh -tt`), so this should only happen for a `remote = false` build, which runs without one. Have the wrapper add `-t` to `docker run` only when `[ -t 0 ]`.
 - **Output only appears at the end:** `rbuild` gives remote builds a terminal so they flush line by line, and its `sed` runs unbuffered. A local build has no terminal, so a program that buffers when piped (Python, including waf) holds its output; set `PYTHONUNBUFFERED=1` or the tool's own flag in its `cmd`.
-- **Builds stale code / line numbers don't match:** the build machine has its own checkout; enable `sync` or have the user push and pull.
+- **Builds stale code / line numbers don't match:** the build machine has its own checkout; enable `checkout` (committed state) and/or `sync` (uncommitted edits), or have the user push and pull.
+- **"commit … is not on the build machine; push it first":** `checkout` fetches from the build machine's own remotes, so the local HEAD commit (and any submodule commits it points at) must be pushed somewhere those remotes reach.
 - **Quickfix entries point at missing files:** check that the output's paths are under the remote repo root (only that prefix is rewritten) or relative to a directory the output announces ("Entering directory"). Errors from paths outside the repo (system headers, other checkouts) can't be mapped.
 - **No builds in the picker:** Neovim's cwd must be inside the repo; check `:messages` for a Lua error or "is not trusted" (they denied the trust prompt; `:trust` re-allows the current file).
 - **Long lines wrap or colors show up in output:** the task already uses a non-terminal buffer, and `rbuild` strips color codes from remote output; leftover escape codes are ones its pattern doesn't cover, so turn color off in the command itself (e.g. `--color=never`).
