@@ -7,9 +7,9 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | Config | What it links/installs |
 | --- | --- |
 | `alacritty` | Alacritty terminal + themes |
-| `claude` | Claude Code settings, agents, commands, `notes` skill |
+| `claude` | Claude Code settings, agents, commands, `notes` + `remote-builds` skills |
 | `claude-japanese` | Japanese study / Anki skills (personal only) |
-| `copilot` | GitHub Copilot CLI user instructions + `notes` skill |
+| `copilot` | GitHub Copilot CLI user instructions + `notes` + `remote-builds` skills |
 | `fonts` | Iosevka Nerd Font + Iosevka Term, downloaded directly from upstream (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |

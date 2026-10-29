@@ -8,3 +8,4 @@
     ~/.claude/agents: dots/claude/.claude/agents
     ~/.claude/commands: dots/claude/.claude/commands
     ~/.claude/skills/notes: dots/notes/skill
+    ~/.claude/skills/remote-builds: dots/nvim/skill
