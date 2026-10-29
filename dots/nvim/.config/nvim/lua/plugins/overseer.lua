@@ -17,25 +17,47 @@ local function load_spec(root)
 	local ok, spec = pcall(chunk)
 	if not ok then
 		return nil, spec
+	elseif type(spec) ~= "table" then
+		return nil, path .. " must return a table"
+	end
+	-- Remote settings used to sit at the top level and on each build; fail loudly rather than
+	-- silently building without them.
+	local old = { "host", "remote_dir", "sync", "artifacts", "exclude" }
+	for _, t in ipairs(vim.list_extend({ spec }, spec.builds or {})) do
+		for _, key in ipairs(old) do
+			if t[key] ~= nil then
+				local where = t == spec and "" or (" in build '" .. tostring(t.name) .. "'")
+				local msg = "%s: move `%s`%s under `remote` (remote_dir is now remote.dir)"
+				return nil, msg:format(path, key, where)
+			end
+		end
 	end
 	return spec
 end
 
-local function rbuild_cmd(spec, build, cmd)
+-- Returns nil when the build runs locally. A build's remote table overrides the repo's key by key.
+local function remote_opts(spec, build)
+	if build.remote == false or (spec.remote == false and build.remote == nil) then
+		return nil
+	end
+	return vim.tbl_extend("force", spec.remote or {}, build.remote or {})
+end
+
+local function rbuild_cmd(remote, cmd)
 	local ret = { rbuild }
-	if spec.sync then
+	if remote.sync then
 		table.insert(ret, "-s")
 	end
-	if spec.host then
-		vim.list_extend(ret, { "-H", spec.host })
+	if remote.host then
+		vim.list_extend(ret, { "-H", remote.host })
 	end
-	if spec.remote_dir then
-		vim.list_extend(ret, { "-d", spec.remote_dir })
+	if remote.dir then
+		vim.list_extend(ret, { "-d", remote.dir })
 	end
-	for _, artifact in ipairs(build.artifacts or spec.artifacts or {}) do
+	for _, artifact in ipairs(remote.artifacts or {}) do
 		vim.list_extend(ret, { "-a", artifact })
 	end
-	for _, pattern in ipairs(build.exclude or spec.exclude or {}) do
+	for _, pattern in ipairs(remote.exclude or {}) do
 		vim.list_extend(ret, { "-x", pattern })
 	end
 	table.insert(ret, "--")
@@ -62,10 +84,10 @@ local provider = {
 				desc = build.desc,
 				params = build.params,
 				builder = function(params)
+					local remote = remote_opts(spec, build)
 					return {
 						name = build.name,
-						cmd = build.remote == false and build.cmd(params)
-							or rbuild_cmd(spec, build, build.cmd(params)),
+						cmd = remote and rbuild_cmd(remote, build.cmd(params)) or build.cmd(params),
 						cwd = root,
 						-- A terminal buffer hard-wraps long lines, which breaks errorformat matching.
 						strategy = { "jobstart", use_terminal = false },
@@ -201,15 +223,19 @@ return {
 --[[ Example .nvim-build.lua (keep it out of git, e.g. via ~/.config/git/ignore):
 
 return {
-	host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
-	-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
-	remote_dir = "src/product-a",
-	-- copied back after a successful build: dirs (mirrored), files, or globs
-	artifacts = { "build/out" },
-	exclude = { "*.o", "*.map" }, -- rsync patterns skipped when copying artifacts back
-	-- copy the working tree up first (tracked + untracked, minus gitignored);
-	-- overwrites remote edits to those files but never deletes remote files
-	sync = true,
+	errorformat = nil, -- optional, for local and remote builds; defaults to Vim's 'errorformat'
+	-- settings for builds run on the build machine; `remote = false` makes every build local
+	remote = {
+		host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
+		-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
+		dir = "src/product-a",
+		-- copy the working tree up first (tracked + untracked, minus gitignored);
+		-- overwrites remote edits to those files but never deletes remote files
+		sync = true,
+		-- copied back after a successful build: dirs (mirrored), files, or globs
+		artifacts = { "build/out" },
+		exclude = { "*.o", "*.map" }, -- rsync patterns skipped when copying artifacts back
+	},
 	builds = {
 		{
 			name = "waf build",
@@ -218,8 +244,8 @@ return {
 				product = { type = "enum", choices = { "name", "other" }, order = 1 },
 				extra = { type = "list", delimiter = " ", optional = true, order = 2, desc = "Extra waf args" },
 			},
-			-- overrides the top-level artifacts/exclude for this build only
-			artifacts = { "build/out/name/*.bin", "build/out/name/app.elf" },
+			-- overrides the repo's remote settings key by key; the rest (host, sync, ...) still apply
+			remote = { artifacts = { "build/out/name/*.bin", "build/out/name/app.elf" } },
 			cmd = function(p)
 				return vim.list_extend({ "./drun", "./waf", "--product=" .. p.product }, p.extra or {})
 			end,
