@@ -1,4 +1,9 @@
 # Sessions open as a plain shell. To auto-launch things, add startup_command
 # to [default_session] or windows to a [[wildcard]]/[[session]] (sesh ignores
 # `windows` on [default_session]) - see https://github.com/joshmedeski/sesh
+
+# name git sessions <parent>/<repo> so same-named repos in different dirs
+# don't collapse into one session
+git_dir_length = 2
+
 [default_session]
