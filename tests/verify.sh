@@ -79,6 +79,8 @@ verify_copilot() {
   check_link "$HOME/.copilot/copilot-instructions.md" "dots/copilot/.copilot/copilot-instructions.md"
   check_link "$HOME/.copilot/skills/notes" "dots/notes/skill"
   check_link "$HOME/.copilot/skills/nvim-tasks" "dots/nvim/skill"
+  check_link "$HOME/.copilot/hooks/notify.json" "dots/copilot/.copilot/hooks/notify.json"
+  check_link "$HOME/.local/bin/copilot-notify" "dots/copilot/.local/bin/copilot-notify"
 }
 
 verify_fonts() {
