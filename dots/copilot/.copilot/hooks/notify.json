@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "\"$HOME/.local/bin/copilot-notify\"",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

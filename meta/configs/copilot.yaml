@@ -6,3 +6,5 @@
     ~/.copilot/copilot-instructions.md: dots/copilot/.copilot/copilot-instructions.md
     ~/.copilot/skills/notes: dots/notes/skill
     ~/.copilot/skills/nvim-tasks: dots/nvim/skill
+    ~/.copilot/hooks/notify.json: dots/copilot/.copilot/hooks/notify.json
+    ~/.local/bin/copilot-notify: dots/copilot/.local/bin/copilot-notify

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Copilot CLI agentStop hook: desktop notification when Copilot finishes a reply.
+# A Windows toast on WSL, notify-send elsewhere. Prints nothing, since agentStop
+# hook output can make Copilot keep going instead of stopping.
+
+dir=$(sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+msg="Finished working${dir:+ in ${dir##*/}}"
+
+if grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
+	ps=$(command -v powershell.exe || echo /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe)
+	# text goes through WSLENV rather than into the script so quotes can't break it
+	export NOTIFY_TITLE="GitHub Copilot" NOTIFY_MSG="$msg"
+	export WSLENV="${WSLENV:+$WSLENV:}NOTIFY_TITLE:NOTIFY_MSG"
+	# hooks block Copilot until they exit, and powershell.exe takes ~1s to start
+	setsid "$ps" -NoProfile -NonInteractive -Command '
+		$m = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
+		$xml = $m::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+		$text = $xml.GetElementsByTagName("text")
+		[void]$text.Item(0).AppendChild($xml.CreateTextNode($env:NOTIFY_TITLE))
+		[void]$text.Item(1).AppendChild($xml.CreateTextNode($env:NOTIFY_MSG))
+		# toasts need a registered app id; borrow PowerShell'"'"'s
+		$app = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
+		$m::CreateToastNotifier($app).Show([Windows.UI.Notifications.ToastNotification]::new($xml))
+	' </dev/null >/dev/null 2>&1 &
+else
+	notify-send -a "GitHub Copilot" "GitHub Copilot" "$msg" >/dev/null 2>&1
+fi
+exit 0
