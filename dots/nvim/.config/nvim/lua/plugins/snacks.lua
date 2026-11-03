@@ -64,9 +64,12 @@ return {
 					-- persistent sidebar; now that it's a centered modal, close it
 					-- like every other picker when a file is opened
 					explorer = { layout = centered_layout, jump = { close = true } },
+					-- recent files are global by default, so other projects' files
+					-- outrank never-opened ones in this project
+					smart = { layout = centered_layout, filter = { cwd = true } },
+					recent = { layout = centered_layout, filter = { cwd = true } },
 				}
 				for _, name in ipairs({
-					"smart",
 					"git_log",
 					"files",
 					"grep",
@@ -105,27 +108,34 @@ return {
 			})
 		end
 
+		-- the repo root rather than nvim's cwd, so launching nvim from a subdir
+		-- still searches the whole project
+		local function project_root()
+			return require("snacks").git.get_root(vim.fn.getcwd()) or vim.fn.getcwd()
+		end
+
 		return {
+			-- files: get to a file
 			{
 				"<leader>ff",
 				function()
-					require("snacks").picker.smart()
+					require("snacks").picker.smart({ cwd = project_root() })
 				end,
-				desc = "Files (smart)",
+				desc = "Find Files",
 			},
 			{
-				"<leader>fz",
+				"<leader>fF",
 				function()
-					require("snacks").picker.files()
+					require("snacks").picker.files({ cwd = project_root() })
 				end,
-				desc = "Files (fuzzy)",
+				desc = "Find Files (unranked)",
 			},
 			{
-				"<leader>fg",
+				"<leader>fr",
 				function()
-					require("snacks").picker.grep()
+					require("snacks").picker.recent({ cwd = project_root() })
 				end,
-				desc = "Grep",
+				desc = "Recent Files",
 			},
 			{
 				"<leader>fb",
@@ -134,28 +144,7 @@ return {
 				end,
 				desc = "Buffers",
 			},
-			{
-				"<leader>fc",
-				function()
-					require("snacks").picker.commands()
-				end,
-				desc = "Commands",
-			},
-			{
-				"<leader>f:",
-				function()
-					require("snacks").picker.command_history()
-				end,
-				desc = "Command History",
-			},
 			{ "<leader>fh", harpoon_picker, desc = "Harpoon Marks" },
-			{
-				"<leader>ee",
-				function()
-					require("snacks").explorer()
-				end,
-				desc = "File Explorer",
-			},
 			{
 				"<leader>fe",
 				function()
@@ -163,44 +152,66 @@ return {
 				end,
 				desc = "File Explorer",
 			},
+			-- search: look inside things
 			{
-				"<leader>f?",
+				"<leader>sg",
 				function()
-					require("snacks").picker.help()
+					require("snacks").picker.grep({ cwd = project_root() })
 				end,
-				desc = "Help Tags",
+				desc = "Grep",
 			},
 			{
-				"<leader>fm",
+				"<leader>sw",
 				function()
-					require("snacks").picker.keymaps()
+					require("snacks").picker.grep_word({ cwd = project_root() })
 				end,
-				desc = "Keymaps",
+				mode = { "n", "x" },
+				desc = "Grep Word/Selection",
 			},
 			{
-				"<leader>fs",
+				"<leader>ss",
 				function()
 					require("snacks").picker.lsp_symbols()
 				end,
 				desc = "Symbols",
 			},
 			{
-				"<leader>fS",
+				"<leader>sS",
 				function()
 					require("snacks").picker.lsp_workspace_symbols()
 				end,
 				desc = "Workspace Symbols",
 			},
 			{
-				"<leader>fw",
+				"<leader>sc",
 				function()
-					require("snacks").picker.grep_word()
+					require("snacks").picker.commands()
 				end,
-				mode = { "n", "x" },
-				desc = "Grep Word/Selection",
+				desc = "Commands",
 			},
 			{
-				"<leader>fu",
+				"<leader>s:",
+				function()
+					require("snacks").picker.command_history()
+				end,
+				desc = "Command History",
+			},
+			{
+				"<leader>sk",
+				function()
+					require("snacks").picker.keymaps()
+				end,
+				desc = "Keymaps",
+			},
+			{
+				"<leader>sh",
+				function()
+					require("snacks").picker.help()
+				end,
+				desc = "Help Tags",
+			},
+			{
+				"<leader>su",
 				function()
 					require("snacks").picker.undo()
 				end,

@@ -1,6 +1,6 @@
 return {
 	"nvim-neo-tree/neo-tree.nvim",
-	-- replaced by snacks explorer picker (<leader>ee), see plugins/snacks.lua
+	-- replaced by snacks explorer picker (<leader>fe), see plugins/snacks.lua
 	enabled = false,
 	dependencies = {
 		"nvim-lua/plenary.nvim",
