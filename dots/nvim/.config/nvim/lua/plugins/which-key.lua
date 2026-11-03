@@ -18,6 +18,7 @@ return {
 				{ "<leader>q", group = "quit/session" },
 				{ "<leader>s", group = "search" },
 				{ "<leader>t", group = "terminal" },
+				{ "<leader>y", group = "yank/copy" },
 				{ "<leader>u", group = "ui", icon = { icon = "󰙵 ", color = "cyan" } },
 				{
 					"<leader>x",
