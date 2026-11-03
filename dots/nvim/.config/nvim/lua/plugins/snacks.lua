@@ -71,6 +71,8 @@ return {
 				}
 				for _, name in ipairs({
 					"git_log",
+					"git_status",
+					"git_diff",
 					"files",
 					"grep",
 					"grep_word",
@@ -240,6 +242,20 @@ return {
 				end,
 				mode = { "n", "t" },
 				desc = "which_key_ignore",
+			},
+			{
+				"<leader>gs",
+				function()
+					require("snacks").picker.git_status()
+				end,
+				desc = "Changed Files",
+			},
+			{
+				"<leader>gS",
+				function()
+					require("snacks").picker.git_diff()
+				end,
+				desc = "Changes (hunks)",
 			},
 			{
 				"<leader>go",
