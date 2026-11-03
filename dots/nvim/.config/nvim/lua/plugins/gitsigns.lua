@@ -20,5 +20,28 @@ return {
     { "<leader>ghD", mode = { "n" }, function() require("gitsigns").diffthis("~") end, desc = "Diff This (Against ~)" },
     { "<leader>gtd", mode = { "n" }, function() require("gitsigns").toggle_deleted() end, desc = "Toggle Deleted" },
 		-- stylua: ignore end
+		-- inside a diff window (diffview, diffthis) keep vim's own ]c/[c
+		{
+			"]c",
+			function()
+				if vim.wo.diff then
+					vim.cmd.normal({ "]c", bang = true })
+				else
+					require("gitsigns").nav_hunk("next")
+				end
+			end,
+			desc = "Next Change",
+		},
+		{
+			"[c",
+			function()
+				if vim.wo.diff then
+					vim.cmd.normal({ "[c", bang = true })
+				else
+					require("gitsigns").nav_hunk("prev")
+				end
+			end,
+			desc = "Prev Change",
+		},
 	},
 }
