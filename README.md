@@ -60,7 +60,7 @@ Machine-specific shell settings go in `~/.zshrc.local`, which `.zshrc` sources i
 
 ## Notes vault
 
-`~/notes` is long-term memory shared with any AI: one note per repo/topic, linked with `[[wikilinks]]`, cataloged in `index.md`. The `notes` config links in only the schema (`AGENTS.md`) and templates — the notes are plain local files, separate on every machine, so work notes never leave the work laptop. Open `~/notes` as an Obsidian vault to see the graph. Claude Code and the Copilot CLI both use it via the same `notes` skill (`dots/notes/skill`, linked by the `claude` / `copilot` configs); point other AIs at `~/notes/AGENTS.md`.
+`~/notes` is long-term memory shared with any AI: one note per repo/topic, linked with `[[wikilinks]]`, cataloged in `index.md`. The `notes` config links in only the schema (`AGENTS.md`) and templates — the notes are plain local files, separate on every machine, so work notes never leave the work laptop. Open `~/notes` as an Obsidian vault to see the graph; in Neovim, `<leader>oN` picks from it (it's also an obsidian.nvim workspace, after `personal`/`work`). Claude Code and the Copilot CLI both use it via the same `notes` skill (`dots/notes/skill`, linked by the `claude` / `copilot` configs); point other AIs at `~/notes/AGENTS.md`.
 
 ## How it works
 

@@ -33,6 +33,17 @@ local function open_weekly_note()
 	note:open()
 end
 
+-- Picks from the ~/notes vault without switching workspaces: switching is
+-- global, so daily/weekly notes would land in ~/notes afterwards.
+local function find_ai_notes()
+	local dir = vim.fs.normalize("~/notes")
+	if not vim.uv.fs_stat(dir) then
+		vim.notify("~/notes doesn't exist - run ./install-standalone notes", vim.log.levels.WARN)
+		return
+	end
+	require("obsidian.picker").find_notes({ prompt_title = "AI Notes", dir = dir })
+end
+
 return {
 	"obsidian-nvim/obsidian.nvim",
 	version = "*", -- use latest release, remove to use latest commit
@@ -45,6 +56,7 @@ return {
 		{ "<leader>od", "<cmd>Obsidian today<cr>", desc = "Obsidian: Today's note" },
 		{ "<leader>oW", open_weekly_note, desc = "Obsidian: This week's note" },
 		{ "<leader>oo", "<cmd>Obsidian quick_switch<cr>", desc = "Obsidian: Quick switch" },
+		{ "<leader>oN", find_ai_notes, desc = "Obsidian: AI notes (~/notes)" },
 		{ "<leader>og", "<cmd>Obsidian search<cr>", desc = "Obsidian: Grep notes" },
 		{ "<leader>ot", "<cmd>Obsidian new todo<cr>", desc = "Obsidian: Todo list" },
 	},
@@ -63,6 +75,11 @@ return {
 			{
 				name = "work",
 				path = "~/vaults/work",
+			},
+			-- Last, so it never becomes the default workspace.
+			{
+				name = "notes",
+				path = "~/notes",
 			},
 		},
 		note_id_func = function(title)
