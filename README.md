@@ -9,12 +9,12 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `alacritty` | Alacritty terminal + themes |
 | `claude` | Claude Code settings, agents, commands, `notes` + `nvim-tasks` skills |
 | `claude-japanese` | Japanese study / Anki skills (personal only) |
-| `copilot` | GitHub Copilot CLI user instructions + `notes` + `nvim-tasks` skills |
+| `copilot` | GitHub Copilot CLI user instructions + `notes` + `nvim-tasks` skills, `desktop-notify` when a reply finishes |
 | `fonts` | Iosevka Nerd Font + Iosevka Term, downloaded directly from upstream (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `kitty` | Kitty terminal |
 | `notes` | `~/notes` vault scaffolding: `AGENTS.md` schema + templates (notes themselves stay local) |
-| `nvim` | Neovim (lazy.nvim config) + per-repo tasks via overseer, `rbuild` remote-build helper |
+| `nvim` | Neovim (lazy.nvim config) + per-repo tasks via overseer, `rbuild` remote-build helper, `desktop-notify` when a task finishes |
 | `obsidian` | Obsidian vault settings, templates, glossary |
 | `sesh` | sesh tmux session manager (pinned release binary) + per-repo session layout config |
 | `tmux` | tmux + plugins (TPM) |

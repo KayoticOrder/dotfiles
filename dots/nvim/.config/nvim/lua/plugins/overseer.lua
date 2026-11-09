@@ -214,6 +214,36 @@ local function restart_last()
 	end
 end
 
+-- overseer's own system notifications only know notify-send, which does nothing on WSL.
+local desktop_notify = vim.fn.expand("~/.local/bin/desktop-notify")
+local focused = true
+vim.api.nvim_create_autocmd({ "FocusGained", "FocusLost" }, {
+	callback = function(ev)
+		focused = ev.event == "FocusGained"
+	end,
+})
+
+-- Focus events reach nvim through tmux too, so switching panes counts as looking away.
+package.preload["overseer.component.notify_unfocused"] = function()
+	return {
+		desc = "Desktop notification when a task finishes while nvim isn't focused",
+		constructor = function()
+			return {
+				on_complete = function(_, task, status)
+					if focused or (status ~= "SUCCESS" and status ~= "FAILURE") then
+						return
+					end
+					local where = task.cwd and (" in " .. vim.fs.basename(task.cwd)) or ""
+					local result = status == "SUCCESS" and "succeeded" or "failed"
+					local msg = string.format("%s %s%s", task.name, result, where)
+					-- pcall: vim.system throws if the script isn't installed
+					pcall(vim.system, { desktop_notify, "Neovim", msg }, { detach = true })
+				end,
+			}
+		end,
+	}
+end
+
 return {
 	"stevearc/overseer.nvim",
 	cmd = { "OverseerRun", "OverseerToggle", "OverseerOpen", "OverseerShell", "OverseerTaskAction" },
@@ -226,6 +256,8 @@ return {
 	config = function()
 		local overseer = require("overseer")
 		overseer.setup({})
+		local default = require("overseer.config").component_aliases.default
+		overseer.register_alias("default", vim.list_extend({ "notify_unfocused" }, default), true)
 		overseer.register_template(provider)
 	end,
 }
