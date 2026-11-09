@@ -11,4 +11,4 @@
 - link:
     ~/.config/nvim: dots/nvim/.config/nvim
     ~/.local/bin/rbuild: dots/nvim/.local/bin/rbuild
-    ~/.local/bin/desktop-notify: dots/notify/.local/bin/desktop-notify
+    ~/.local/bin/desktop-notify: dots/scripts/.local/bin/desktop-notify

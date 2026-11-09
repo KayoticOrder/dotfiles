@@ -8,4 +8,4 @@
     ~/.copilot/skills/nvim-tasks: dots/nvim/skill
     ~/.copilot/hooks/notify.json: dots/copilot/.copilot/hooks/notify.json
     ~/.local/bin/copilot-notify: dots/copilot/.local/bin/copilot-notify
-    ~/.local/bin/desktop-notify: dots/notify/.local/bin/desktop-notify
+    ~/.local/bin/desktop-notify: dots/scripts/.local/bin/desktop-notify
