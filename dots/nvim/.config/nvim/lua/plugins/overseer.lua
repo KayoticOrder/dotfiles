@@ -214,6 +214,67 @@ local function restart_last()
 	end
 end
 
+-- overseer's own system notifications only know notify-send, which does nothing on WSL.
+local focused = true
+vim.api.nvim_create_autocmd({ "FocusGained", "FocusLost" }, {
+	callback = function(ev)
+		focused = ev.event == "FocusGained"
+	end,
+})
+
+local function desktop_notify(title, msg)
+	if vim.fn.has("wsl") == 1 then
+		local ps = vim.fn.exepath("powershell.exe")
+		if ps == "" then
+			ps = "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+		end
+		-- text goes through WSLENV rather than into the script so quotes can't break it
+		local env = {
+			NOTIFY_TITLE = title,
+			NOTIFY_MSG = msg,
+			WSLENV = (vim.env.WSLENV and vim.env.WSLENV .. ":" or "") .. "NOTIFY_TITLE:NOTIFY_MSG",
+		}
+		-- pcall: vim.system throws if the exe is missing
+		pcall(vim.system, {
+			ps,
+			"-NoProfile",
+			"-NonInteractive",
+			"-Command",
+			[[
+			$m = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
+			$xml = $m::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+			$text = $xml.GetElementsByTagName("text")
+			[void]$text.Item(0).AppendChild($xml.CreateTextNode($env:NOTIFY_TITLE))
+			[void]$text.Item(1).AppendChild($xml.CreateTextNode($env:NOTIFY_MSG))
+			# toasts need a registered app id; borrow PowerShell's
+			$app = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
+			$m::CreateToastNotifier($app).Show([Windows.UI.Notifications.ToastNotification]::new($xml))
+			]],
+		}, { env = env, detach = true })
+	elseif vim.fn.executable("notify-send") == 1 then
+		vim.system({ "notify-send", "-a", title, title, msg }, { detach = true })
+	end
+end
+
+-- Focus events reach nvim through tmux too, so switching panes counts as looking away.
+package.preload["overseer.component.notify_unfocused"] = function()
+	return {
+		desc = "Desktop notification when a task finishes while nvim isn't focused",
+		constructor = function()
+			return {
+				on_complete = function(_, task, status)
+					if focused or (status ~= "SUCCESS" and status ~= "FAILURE") then
+						return
+					end
+					local where = task.cwd and (" in " .. vim.fs.basename(task.cwd)) or ""
+					local result = status == "SUCCESS" and "succeeded" or "failed"
+					desktop_notify("Neovim", string.format("%s %s%s", task.name, result, where))
+				end,
+			}
+		end,
+	}
+end
+
 return {
 	"stevearc/overseer.nvim",
 	cmd = { "OverseerRun", "OverseerToggle", "OverseerOpen", "OverseerShell", "OverseerTaskAction" },
@@ -226,6 +287,8 @@ return {
 	config = function()
 		local overseer = require("overseer")
 		overseer.setup({})
+		local default = require("overseer.config").component_aliases.default
+		overseer.register_alias("default", vim.list_extend({ "notify_unfocused" }, default), true)
 		overseer.register_template(provider)
 	end,
 }
