@@ -1,58 +1,30 @@
 #!/usr/bin/env bash
 # Copilot CLI agentStop hook: desktop notification when Copilot finishes a reply,
-# unless you're already looking at it. A Windows toast on WSL, notify-send
-# elsewhere. Prints nothing, since agentStop hook output can make Copilot keep
-# going instead of stopping.
+# unless you're already looking at it. Prints nothing, since agentStop hook
+# output can make Copilot keep going instead of stopping.
 
 dir=$(sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 msg="Finished working${dir:+ in ${dir##*/}}"
+notify() { "$HOME/.local/bin/desktop-notify" "$@" >/dev/null 2>&1; exit 0; }
 
 # In tmux we can tell exactly: the pane is on screen and a client's terminal has
 # focus ("focused" relies on focus-events, which tmux.conf turns on).
 # Outside tmux the best we can do is ask the OS whether the terminal is focused.
-check_fg=1
 if [ -n "$TMUX" ] && [ -n "$TMUX_PANE" ]; then
-	check_fg=0
 	if [ "$(tmux display -p -t "$TMUX_PANE" '#{pane_active}#{window_active}' 2>/dev/null)" = 11 ] &&
 		tmux list-clients -t "$TMUX_PANE" -F '#{client_flags}' 2>/dev/null | grep -q focused; then
 		exit 0
 	fi
+	notify "GitHub Copilot" "$msg"
 fi
 
-if grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
-	ps=$(command -v powershell.exe || echo /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe)
-	# text goes through WSLENV rather than into the script so quotes can't break it
-	export NOTIFY_TITLE="GitHub Copilot" NOTIFY_MSG="$msg" NOTIFY_CHECK_FG="$check_fg"
-	export WSLENV="${WSLENV:+$WSLENV:}NOTIFY_TITLE:NOTIFY_MSG:NOTIFY_CHECK_FG"
-	# hooks block Copilot until they exit, and powershell.exe takes ~1s to start
-	setsid "$ps" -NoProfile -NonInteractive -Command '
-		if ($env:NOTIFY_CHECK_FG -eq "1") {
-			Add-Type -Namespace W -Name U -MemberDefinition "
-				[DllImport(`"user32.dll`")] public static extern IntPtr GetForegroundWindow();
-				[DllImport(`"user32.dll`")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint p);"
-			$fg = 0
-			[void][W.U]::GetWindowThreadProcessId([W.U]::GetForegroundWindow(), [ref]$fg)
-			if ((Get-Process -Id $fg -ErrorAction SilentlyContinue).ProcessName -eq "WindowsTerminal") { exit }
-		}
-		$m = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
-		$xml = $m::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
-		$text = $xml.GetElementsByTagName("text")
-		[void]$text.Item(0).AppendChild($xml.CreateTextNode($env:NOTIFY_TITLE))
-		[void]$text.Item(1).AppendChild($xml.CreateTextNode($env:NOTIFY_MSG))
-		# toasts need a registered app id; borrow PowerShell'"'"'s
-		$app = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
-		$m::CreateToastNotifier($app).Show([Windows.UI.Notifications.ToastNotification]::new($xml))
-	' </dev/null >/dev/null 2>&1 &
-else
-	if [ "$check_fg" = 1 ] && command -v hyprctl >/dev/null; then
-		# the focused window is ours if its pid is one of our ancestors
-		fg=$(hyprctl activewindow 2>/dev/null | sed -n 's/^[[:space:]]*pid: //p')
-		p=$$
-		while [ -n "$fg" ] && [ "${p:-0}" -gt 1 ]; do
-			[ "$p" = "$fg" ] && exit 0
-			p=$(ps -o ppid= -p "$p" | tr -d ' ')
-		done
-	fi
-	notify-send -a "GitHub Copilot" "GitHub Copilot" "$msg" >/dev/null 2>&1
+if command -v hyprctl >/dev/null; then
+	# the focused window is ours if its pid is one of our ancestors
+	fg=$(hyprctl activewindow 2>/dev/null | sed -n 's/^[[:space:]]*pid: //p')
+	p=$$
+	while [ -n "$fg" ] && [ "${p:-0}" -gt 1 ]; do
+		[ "$p" = "$fg" ] && exit 0
+		p=$(ps -o ppid= -p "$p" | tr -d ' ')
+	done
 fi
-exit 0
+notify -f WindowsTerminal "GitHub Copilot" "$msg"

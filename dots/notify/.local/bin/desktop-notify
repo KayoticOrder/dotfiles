@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Usage: desktop-notify [-f PROCESS] TITLE MESSAGE
+# A Windows toast on WSL, notify-send elsewhere. Returns right away.
+#   -f PROCESS  WSL only: skip it if PROCESS (e.g. WindowsTerminal) owns the
+#               foreground window. Checked inside the toast's PowerShell, since
+#               powershell.exe takes ~1s to start.
+
+fg_proc=
+if [ "$1" = -f ]; then
+	fg_proc=$2
+	shift 2
+fi
+title=$1 msg=$2
+
+if grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
+	ps=$(command -v powershell.exe || echo /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe)
+	# text goes through WSLENV rather than into the script so quotes can't break it
+	export NOTIFY_TITLE="$title" NOTIFY_MSG="$msg" NOTIFY_FG_PROC="$fg_proc"
+	export WSLENV="${WSLENV:+$WSLENV:}NOTIFY_TITLE:NOTIFY_MSG:NOTIFY_FG_PROC"
+	setsid "$ps" -NoProfile -NonInteractive -Command '
+		if ($env:NOTIFY_FG_PROC) {
+			Add-Type -Namespace W -Name U -MemberDefinition "
+				[DllImport(`"user32.dll`")] public static extern IntPtr GetForegroundWindow();
+				[DllImport(`"user32.dll`")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint p);"
+			$fg = 0
+			[void][W.U]::GetWindowThreadProcessId([W.U]::GetForegroundWindow(), [ref]$fg)
+			if ((Get-Process -Id $fg -ErrorAction SilentlyContinue).ProcessName -eq $env:NOTIFY_FG_PROC) { exit }
+		}
+		$m = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
+		$xml = $m::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+		$text = $xml.GetElementsByTagName("text")
+		[void]$text.Item(0).AppendChild($xml.CreateTextNode($env:NOTIFY_TITLE))
+		[void]$text.Item(1).AppendChild($xml.CreateTextNode($env:NOTIFY_MSG))
+		# toasts need a registered app id; borrow PowerShell'"'"'s
+		$app = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
+		$m::CreateToastNotifier($app).Show([Windows.UI.Notifications.ToastNotification]::new($xml))
+	' </dev/null >/dev/null 2>&1 &
+else
+	notify-send -a "$title" "$title" "$msg" >/dev/null 2>&1
+fi
+exit 0

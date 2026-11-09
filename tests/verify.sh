@@ -81,6 +81,7 @@ verify_copilot() {
   check_link "$HOME/.copilot/skills/nvim-tasks" "dots/nvim/skill"
   check_link "$HOME/.copilot/hooks/notify.json" "dots/copilot/.copilot/hooks/notify.json"
   check_link "$HOME/.local/bin/copilot-notify" "dots/copilot/.local/bin/copilot-notify"
+  check_link "$HOME/.local/bin/desktop-notify" "dots/notify/.local/bin/desktop-notify"
 }
 
 verify_fonts() {
@@ -113,6 +114,7 @@ verify_kitty() {
 verify_nvim() {
   check_link "$HOME/.config/nvim" "dots/nvim/.config/nvim"
   check_link "$HOME/.local/bin/rbuild" "dots/nvim/.local/bin/rbuild"
+  check_link "$HOME/.local/bin/desktop-notify" "dots/notify/.local/bin/desktop-notify"
   check_bin nvim
   check_bin dot
   check_bin java
