@@ -47,14 +47,16 @@ to=$(printf '%s' "$local_root" | sed 's/[\&#]/\\&/g')
 # its checkout is treated as a mirror, and -s re-applies local edits on top. Untracked files stay.
 if [ -n "$checkout" ]; then
 	sha=$(git -C "$local_root" rev-parse HEAD) || exit
-	ssh "$host" "cd $(printf %q "$remote_root") || exit
-		git fetch --quiet --all || exit
-		if ! git cat-file -e '$sha^{commit}' 2>/dev/null; then
-			echo 'rbuild: commit $sha is not on the build machine; push it first' >&2
-			exit 1
-		fi
+	# Pushed straight from here, so unpushed local commits build too. A hidden ref rather
+	# than a branch, so nothing shows up in the build machine's branch list.
+	git -C "$local_root" push --quiet --force "$host:$remote_root" HEAD:refs/rbuild/head || exit
+	# Submodules not yet cloned on the build machine have nowhere to push to; submodule
+	# update clones them and fetches from their remotes as usual.
+	(cd "$local_root" && RB_HOST=$host RB_ROOT=$remote_root git submodule foreach --recursive --quiet \
+		'git push --quiet --force "$RB_HOST:$RB_ROOT/$displaypath" HEAD:refs/rbuild/head 2>/dev/null || true')
+	ssh "$host" "cd $(printf %q "$remote_root") &&
 		git checkout --quiet --force --detach $sha &&
-			git submodule update --quiet --init --recursive --force" || exit
+		git submodule update --quiet --init --recursive --force" || exit
 fi
 
 # Tracked plus untracked-but-not-ignored files, so build outputs and .git stay put remotely.
