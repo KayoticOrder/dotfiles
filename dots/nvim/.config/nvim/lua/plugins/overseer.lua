@@ -271,8 +271,8 @@ return {
 		host = "buildbox", -- ssh host; defaults to $RBUILD_HOST, then "buildbox"
 		-- relative to the remote $HOME; defaults to this repo's path under the local $HOME
 		dir = "src/product-a",
-		-- check out your local HEAD commit there first (fetched, detached); discards edits to
-		-- tracked files on the build machine, keeps untracked ones. The commit must be pushed.
+		-- push your local HEAD commit there and check it out first (detached; unpushed commits
+		-- work); discards edits to tracked files on the build machine, keeps untracked ones.
 		checkout = true,
 		-- copy the working tree up first (tracked + untracked, minus gitignored);
 		-- overwrites remote edits to those files but never deletes remote files

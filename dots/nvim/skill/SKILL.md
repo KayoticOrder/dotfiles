@@ -19,7 +19,7 @@ return {
 	remote = { -- optional; settings for tasks run on the build machine, or `false` to make every task local
 		host = "buildbox", -- optional; ssh host, else $RBUILD_HOST, else "buildbox"
 		dir = "src/x", -- optional; relative to remote $HOME, else the repo's path under local $HOME
-		checkout = true, -- optional; fetch and check out the local HEAD commit there first (detached, submodules updated)
+		checkout = true, -- optional; push the local HEAD commit there over ssh and check it out first (detached, submodules updated); unpushed commits work
 		sync = true, -- optional; copy the working tree up first (tracked + untracked, minus gitignored, submodules too)
 		artifacts = { "build/out" }, -- optional; repo-relative dirs (mirrored), files or globs, copied back after a successful run
 		exclude = { "*.o" }, -- optional; rsync patterns skipped when copying artifacts back
@@ -64,7 +64,7 @@ return {
 - **"the input device is not a TTY":** remote tasks get a terminal (`ssh -tt`), so this should only happen for a `remote = false` task, which runs without one. Have the wrapper add `-t` to `docker run` only when `[ -t 0 ]`.
 - **Output only appears at the end:** `rbuild` gives remote tasks a terminal so they flush line by line, and its `sed` runs unbuffered. A local task has no terminal, so a program that buffers when piped (Python, including waf) holds its output; set `PYTHONUNBUFFERED=1` or the tool's own flag in its `cmd`.
 - **Builds stale code / line numbers don't match:** the build machine has its own checkout; enable `checkout` (committed state) and/or `sync` (uncommitted edits), or have the user push and pull.
-- **"commit … is not on the build machine; push it first":** `checkout` fetches from the build machine's own remotes, so the local HEAD commit (and any submodule commits it points at) must be pushed somewhere those remotes reach.
+- **`checkout` fails in `git push` or `submodule update`:** `checkout` pushes the local HEAD (and each submodule's) over ssh to a hidden `refs/rbuild/head` in the build machine's checkout, so `git` must be on the remote PATH for non-interactive ssh. A submodule that isn't cloned there yet can't be pushed to; `submodule update` then clones it from its URL, so on that first run its commit must be pushed somewhere that URL reaches.
 - **Quickfix entries point at missing files:** check that the output's paths are under the remote repo root (only that prefix is rewritten) or relative to a directory the output announces ("Entering directory"). Errors from paths outside the repo (system headers, other checkouts) can't be mapped.
 - **No tasks in the picker:** Neovim's cwd must be inside the repo; check `:messages` for a Lua error, a rename error, or "is not trusted" (they denied the trust prompt; `:trust` re-allows the current file).
 - **Long lines wrap or colors show up in output:** the task already uses a non-terminal buffer, and `rbuild` strips color codes from remote output; leftover escape codes are ones its pattern doesn't cover, so turn color off in the command itself (e.g. `--color=never`).
