@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Immersion Player</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <aside id="sidebar">
+    <input id="filter" type="search" placeholder="Filter videos…" autocomplete="off">
+    <ul id="files"></ul>
+  </aside>
+  <main>
+    <div id="player">
+      <video id="video" controls controlslist="nofullscreen" preload="metadata"></video>
+      <div id="subs" lang="ja"></div>
+      <div id="badge" hidden></div>
+    </div>
+    <div id="bar">
+      <span id="title">Pick a video</span>
+      <label>Subtitles
+        <select id="track"></select>
+      </label>
+      <label><input type="checkbox" id="auto-generate" checked> Auto-generate</label>
+      <label><input type="checkbox" id="hover-pause" checked> Pause on hover</label>
+      <button id="fullscreen" title="Fullscreen (f)">⛶</button>
+    </div>
+    <p id="keys">space play/pause · ←/→ 5s · a/d prev/next line · r replay line · s hide subs · f fullscreen</p>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
