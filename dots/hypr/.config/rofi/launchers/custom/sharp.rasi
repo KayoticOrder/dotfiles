@@ -1,0 +1,150 @@
+/**
+ * "sharp" launcher: flat, thin-bordered, small-radius container matching
+ * Hyprland's window rounding (8px) and 2px border weight, with a
+ * left-accent-bar selection highlight instead of a filled pill.
+ **/
+
+configuration {
+    modi:                 "drun";
+    show-icons:           true;
+    icon-theme:           "Kanagawa-Mono";
+    display-drun:         "";
+    drun-display-format:  "{name}";
+    font:                 "IosevkaTerm Nerd Font 11";
+}
+
+@import "~/.config/rofi/colors/rice.rasi"
+
+window {
+    transparency:      "real";
+    location:           center;
+    anchor:              center;
+    width:               560px;
+    enabled:             true;
+    border:              2px;
+    border-color:        @border;
+    border-radius:       8px;
+    background-color:    @background;
+    cursor:              "default";
+}
+
+mainbox {
+    spacing:             0px;
+    padding:             0px;
+    background-color:    transparent;
+    children:            [ "inputbar", "listview" ];
+}
+
+inputbar {
+    spacing:             10px;
+    padding:             14px 16px;
+    border:              0px 0px 2px 0px;
+    border-color:        @border;
+    background-color:    transparent;
+    text-color:          @foreground;
+    children:            [ "prompt", "entry" ];
+}
+
+prompt {
+    background-color:    inherit;
+    text-color:          @selected;
+}
+textbox-prompt-colon {
+    expand:              false;
+    str:                 " ";
+    background-color:    inherit;
+    text-color:          @selected;
+}
+entry {
+    background-color:    inherit;
+    text-color:          inherit;
+    cursor:              text;
+    placeholder:         "Search...";
+    placeholder-color:   @foreground-dim;
+}
+
+listview {
+    columns:             1;
+    lines:                8;
+    cycle:               true;
+    dynamic:             true;
+    scrollbar:           true;
+    fixed-height:        true;
+    fixed-columns:       true;
+
+    spacing:             2px;
+    padding:             8px;
+    border:              0px;
+    background-color:    transparent;
+    text-color:          @foreground;
+    cursor:              "default";
+}
+scrollbar {
+    handle-width:        2px;
+    handle-color:        @border;
+    background-color:    transparent;
+}
+
+element {
+    padding:             8px 10px;
+    border:              0px 0px 0px 2px;
+    border-color:        transparent;
+    background-color:    transparent;
+    text-color:          @foreground;
+    cursor:              pointer;
+}
+element normal.normal {
+    background-color:    transparent;
+    text-color:          @foreground;
+}
+element normal.urgent {
+    background-color:    transparent;
+    text-color:          @urgent;
+}
+element normal.active {
+    background-color:    transparent;
+    text-color:          @active;
+}
+element selected.normal {
+    background-color:    @background-alt;
+    text-color:          @foreground;
+    border-color:        @selected;
+}
+element selected.urgent {
+    background-color:    @background-alt;
+    text-color:          @urgent;
+    border-color:        @urgent;
+}
+element selected.active {
+    background-color:    @background-alt;
+    text-color:          @active;
+    border-color:        @active;
+}
+element-icon {
+    size:                 20px;
+    background-color:     transparent;
+    text-color:           inherit;
+    cursor:               inherit;
+}
+element-text {
+    background-color:     transparent;
+    text-color:           inherit;
+    cursor:               inherit;
+    vertical-align:       0.5;
+    horizontal-align:     0.0;
+}
+
+error-message {
+    padding:              14px;
+    border:               2px;
+    border-color:         @urgent;
+    border-radius:        8px;
+    background-color:     @background;
+    text-color:           @foreground;
+}
+textbox {
+    background-color:     @background;
+    text-color:           @foreground;
+    vertical-align:       0.5;
+    horizontal-align:     0.0;
+}

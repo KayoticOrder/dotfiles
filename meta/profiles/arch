@@ -1,5 +1,6 @@
 arch
 fonts
+fontconfig
 tmux
 sesh
 kitty
@@ -7,3 +8,4 @@ alacritty
 zsh
 nvim
 hypr
+fcitx5

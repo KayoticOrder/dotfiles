@@ -10,6 +10,8 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `claude` | Claude Code settings, agents, commands, `notes` + `nvim-tasks` skills |
 | `claude-japanese` | Japanese study / Anki skills (personal only) |
 | `copilot` | GitHub Copilot CLI user instructions + `notes` + `nvim-tasks` skills, `desktop-notify` when a reply finishes |
+| `fcitx5` | fcitx5 + Mozc Japanese input method |
+| `fontconfig` | Prefers the JP variant of Noto CJK so kanji don't render with Korean/Chinese glyph shapes |
 | `fonts` | Iosevka Nerd Font + Iosevka Term, downloaded directly from upstream (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
 | `immersion-player` | Local video player with GPU Whisper-generated Japanese subtitles that Yomitan can scan (`immersion-player`, then open http://127.0.0.1:8765) |

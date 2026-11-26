@@ -1,5 +1,6 @@
 ubuntu
 fonts
+fontconfig
 tmux
 sesh
 kitty

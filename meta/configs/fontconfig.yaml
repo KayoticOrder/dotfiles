@@ -1,0 +1,6 @@
+- omnipkg:
+    - install:
+        - { pac: noto-fonts-cjk, apt: fonts-noto-cjk }
+
+- link:
+    ~/.config/fontconfig: dots/fontconfig/.config/fontconfig

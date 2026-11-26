@@ -5,3 +5,12 @@
     ~/.config/hypr: dots/hypr/.config/hypr
     ~/.config/rofi: dots/hypr/.config/rofi
     ~/.config/waybar: dots/hypr/.config/waybar
+
+# Builds ~/.local/share/icons/Kanagawa-Mono, a single-color icon set used by
+# the rofi launcher (launchers/custom/sharp.rasi), derived from the
+# "kanagawa-gtk-theme-git" AUR package's symbolic icons. That package isn't
+# installed by this repo (AUR, not in omnipkg) - the script skips harmlessly
+# if it's missing.
+- shell:
+  - command: ~/.config/rofi/scripts/generate-mono-icons
+    description: "Generate the Kanagawa-Mono single-color rofi icon theme"

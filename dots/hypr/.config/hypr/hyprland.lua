@@ -35,6 +35,7 @@ hl.env("WLR_NO_HARDWARE_CURSORS", "1")
 hl.env("XMODIFIERS", "@im=fcitx")
 hl.env("GTK_IM_MODULE", "fcitx")
 hl.env("QT_IM_MODULE", "fcitx")
+hl.env("LC_TIME", "ja_JP.UTF-8")
 
 
 ---------------
@@ -146,7 +147,7 @@ hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("alacritty ranger"))
 hl.bind(mainMod .. " + F",      hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + M",      hl.dsp.window.fullscreen({ action = "toggle" }))
 hl.bind(mainMod .. " + END",    hl.dsp.exit())
-hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/rofi/scripts/launcher_t1"))
+hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/rofi/scripts/launcher_sharp"))
 hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())    -- dwindle
 hl.bind(mainMod .. " + G",      hl.dsp.layout("togglesplit"))
 
@@ -157,11 +158,19 @@ hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("spotify --enable-features=Us
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("mkdir -p ~/screenshots && grim -g \"$(slurp -d)\" - | tee ~/screenshots/$(date +'%Y%m%d_%H%M%S').png | wl-copy"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/scripts/record_audio_toggle.sh"))
 
+-- GSM overlay show key; portal shortcuts do nothing until bound here.
+hl.bind("ALT + Z", hl.dsp.global("com.beangate.gamesentenceminer:gsm:manual-show"))
+hl.bind("ALT + SHIFT + Y", hl.dsp.global("com.beangate.gamesentenceminer:gsm:app:yomitanSettings"))
+
 hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("playerctl -p spotify,% previous"))
 hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("playerctl -p spotify,% next"))
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("playerctl -p spotify,% volume 0.05-"))
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("playerctl -p spotify,% volume 0.05+"))
 hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("playerctl -p spotify,% play-pause"))
+
+-- Volume applies to the focused window's own audio stream (falls back to
+-- the default sink if it has none), rather than the system-wide mixer.
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("~/scripts/focused_volume.sh down"))
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("~/scripts/focused_volume.sh up"))
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("~/scripts/focused_volume.sh mute"))
 
 -- Move focus/move with mainMod + shift + vimkeys
 hl.bind(mainMod .. " + H",         hl.dsp.focus({ direction = "l" }))
@@ -202,3 +211,10 @@ hl.workspace_rule({ workspace = "4", monitor = "DP-2" })
 hl.workspace_rule({ workspace = "8",  monitor = "DP-3", default = true })
 hl.workspace_rule({ workspace = "9",  monitor = "DP-3" })
 hl.workspace_rule({ workspace = "10", monitor = "DP-3" })
+
+-- GSM's overlay opens on whatever workspace it likes; pin keeps it over the game.
+hl.window_rule({
+    name  = "gsm-overlay",
+    match = { class = "^com\\.beangate\\.gamesentenceminer$", title = "^GSM Overlay$" },
+    float = true, pin = true, border_size = 0, rounding = 0, no_blur = true, no_shadow = true, no_anim = true,
+})

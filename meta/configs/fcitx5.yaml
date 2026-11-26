@@ -1,0 +1,9 @@
+- omnipkg:
+    - install:
+        - fcitx5
+        - fcitx5-mozc
+        - { pac: fcitx5-qt, apt: fcitx5-frontend-qt5 }
+        - { pac: fcitx5-configtool, apt: fcitx5-config-qt }
+
+- link:
+    ~/.config/fcitx5: dots/fcitx5/.config/fcitx5

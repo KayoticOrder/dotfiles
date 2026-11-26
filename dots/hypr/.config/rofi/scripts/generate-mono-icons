@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Builds a "Kanagawa-Mono" icon theme from the system Kanagawa theme's
+# apps/symbolic/ icons (single-color #DCD7BA flat SVGs) so rofi can show
+# every app icon in one color instead of Kanagawa's normal full-color set.
+# Falls back to Kanagawa (then hicolor) for any app with no symbolic icon.
+set -euo pipefail
+
+src="/usr/share/icons/Kanagawa/apps/symbolic"
+dest="$HOME/.local/share/icons/Kanagawa-Mono"
+stamp="$dest/.generated-from"
+
+# Non-fatal: the "kanagawa-gtk-theme-git" AUR package that provides $src
+# isn't part of this repo's reproducible install, so don't break `dotbot
+# apply` on a machine that doesn't have it - just skip and fall back to
+# whatever icon-theme is next in the rofi config's inheritance chain.
+if [ ! -d "$src" ]; then
+    echo "WARN: $src not found (install the 'kanagawa-gtk-theme-git' AUR package for mono icons) - skipping" >&2
+    exit 0
+fi
+
+if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$src" ] && [ -d "$dest/apps/16" ]; then
+    exit 0
+fi
+
+rm -rf "$dest"
+mkdir -p "$dest/apps/16"
+
+cat > "$dest/index.theme" <<'EOF'
+[Icon Theme]
+Name=Kanagawa-Mono
+Comment=Single-color variant of Kanagawa, generated from its symbolic icons
+Inherits=Kanagawa,hicolor
+Directories=apps/16
+
+[apps/16]
+Context=Applications
+Size=16
+MinSize=16
+MaxSize=512
+Type=Scalable
+EOF
+
+for f in "$src"/*-symbolic.svg; do
+    name="$(basename "$f" | sed 's/-symbolic\.svg$/.svg/')"
+    cp "$f" "$dest/apps/16/$name"
+done
+
+echo "$src" > "$stamp"
+gtk-update-icon-cache "$dest" 2>/dev/null || true
+
+count=$(find "$dest/apps/16" -name '*.svg' | wc -l)
+if [ "$count" -lt 100 ]; then
+    echo "ERROR: only $count icons generated into $dest/apps/16 - something's wrong" >&2
+    exit 1
+fi

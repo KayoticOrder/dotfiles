@@ -73,8 +73,9 @@
     "on-click": "hyprpicker -a"
   },
   "clock": {
+    "locale": "ja_JP.UTF-8",
     "format": "{:%H:%M}",
-    "format-alt": "{:%I:%M %p %d/%m/%Y}"
+    "format-alt": "{:%Y年%m月%d日(%a) %H:%M}"
   },
   "tray": {
     "icon-size": 21,

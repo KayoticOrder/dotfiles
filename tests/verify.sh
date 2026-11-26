@@ -97,6 +97,16 @@ verify_alacritty() {
   check_bin alacritty
 }
 
+verify_fcitx5() {
+  check_link "$HOME/.config/fcitx5" "dots/fcitx5/.config/fcitx5"
+  check_bin fcitx5
+}
+
+verify_fontconfig() {
+  check_link "$HOME/.config/fontconfig" "dots/fontconfig/.config/fontconfig"
+  check_font "noto sans mono cjk jp"
+}
+
 verify_hypr() {
   check_link "$HOME/.config/hypr" "dots/hypr/.config/hypr"
   check_link "$HOME/.config/rofi" "dots/hypr/.config/rofi"
