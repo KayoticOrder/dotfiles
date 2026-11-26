@@ -1,0 +1,9 @@
+# Python deps (faster-whisper + CUDA libs) live in a venv the launcher creates
+# on first run, so only the system pieces it needs are installed here.
+- omnipkg:
+  - install:
+    - { pac: python, apt: python3, dnf: python3, brew: python }
+    - { apt: python3-venv }
+
+- link:
+    ~/.local/bin/immersion-player: dots/immersion-player/.local/bin/immersion-player

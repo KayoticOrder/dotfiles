@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Launches immersion-player, creating its venv on first run (or when
+# requirements.txt changes). All arguments pass through to server.py.
+set -euo pipefail
+
+app="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../../app" && pwd)"
+venv="${XDG_DATA_HOME:-$HOME/.local/share}/immersion-player/venv"
+stamp="$venv/.requirements"
+
+if [[ ! -x "$venv/bin/python" ]] || ! cmp -s "$app/requirements.txt" "$stamp"; then
+  echo "Setting up Python environment in $venv (first run downloads ~1GB of CUDA libraries)..." >&2
+  python3 -m venv "$venv"
+  "$venv/bin/pip" install --upgrade pip >/dev/null
+  "$venv/bin/pip" install -r "$app/requirements.txt"
+  cp "$app/requirements.txt" "$stamp"
+fi
+
+# CTranslate2 dlopens cuBLAS/cuDNN at runtime and doesn't look inside the pip wheels.
+nvidia_libs="$("$venv/bin/python" - <<'PY'
+import glob, os, site
+print(':'.join(sorted(glob.glob(os.path.join(site.getsitepackages()[0], 'nvidia', '*', 'lib')))))
+PY
+)"
+export LD_LIBRARY_PATH="${nvidia_libs}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+exec "$venv/bin/python" "$app/server.py" "$@"

@@ -106,6 +106,11 @@ verify_hypr() {
   check_bin rofi
 }
 
+verify_immersion-player() {
+  check_link "$HOME/.local/bin/immersion-player" "dots/immersion-player/.local/bin/immersion-player"
+  check_bin python3
+}
+
 verify_kitty() {
   check_link "$HOME/.config/kitty" "dots/kitty/.config/kitty"
   check_bin kitty

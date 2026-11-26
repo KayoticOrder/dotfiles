@@ -12,6 +12,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `copilot` | GitHub Copilot CLI user instructions + `notes` + `nvim-tasks` skills, `desktop-notify` when a reply finishes |
 | `fonts` | Iosevka Nerd Font + Iosevka Term, downloaded directly from upstream (used by `alacritty`/`kitty`) |
 | `hypr` | Hyprland, Waybar, Rofi |
+| `immersion-player` | Local video player with GPU Whisper-generated Japanese subtitles that Yomitan can scan (`immersion-player`, then open http://127.0.0.1:8765) |
 | `kitty` | Kitty terminal |
 | `notes` | `~/notes` vault scaffolding: `AGENTS.md` schema + templates (notes themselves stay local) |
 | `nvim` | Neovim (lazy.nvim config) + per-repo tasks via overseer, `rbuild` remote-build helper, `desktop-notify` when a task finishes |
@@ -20,7 +21,7 @@ Personal dotfiles for an Arch Linux + Hyprland desktop, managed with [Dotbot](ht
 | `tmux` | tmux + plugins (TPM) |
 | `zsh` | zsh, oh-my-zsh, Powerlevel10k |
 
-`claude`, `claude-japanese`, `copilot`, `notes` and `obsidian` aren't in the `arch`/`ubuntu` profiles — install them explicitly with `install-standalone` if you want them on a given machine (e.g. `./install-standalone claude claude-japanese notes`).
+`claude`, `claude-japanese`, `copilot`, `immersion-player`, `notes` and `obsidian` aren't in the `arch`/`ubuntu` profiles — install them explicitly with `install-standalone` if you want them on a given machine (e.g. `./install-standalone claude claude-japanese notes`).
 
 Each config lives under `dots/<name>` and is symlinked into place; the matching `meta/configs/<name>.yaml` declares its packages and links.
 
